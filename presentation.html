@@ -514,10 +514,385 @@
 </div>
 
 <!-- ══════════════════════════════════════════════════════ -->
-<!-- SLIDE 2: THE PROBLEM -->
+<!-- SLIDE 2: OUR JOURNEY -->
 <!-- ══════════════════════════════════════════════════════ -->
 <div class="slide" data-slide="2">
-  <h2>Los agentes de hoy son <span class="accent-c">amnésicos</span></h2>
+  <h2>Nuestro recorrido</h2>
+  <p class="dim" style="margin-bottom:28px;">Con Ismael Faro (VP of AI, IBM) exploramos una pregunta:</p>
+  <div class="highlight-box" style="border-color: var(--accent2); color: var(--accent2); font-size:1.4rem; font-style:normal; font-weight:600;">
+    ¿Cómo construir agentes que realmente aprenden entre sesiones?
+  </div>
+  <div style="margin-top:32px;">
+    <div style="display:flex; align-items:flex-start; gap:24px; padding:16px 0; border-bottom:1px solid rgba(255,255,255,0.06);">
+      <span class="big-number dim" style="font-size:2rem; min-width:40px;">1</span>
+      <div>
+        <p style="font-size:1.2rem;"><strong>Sub-Agentes</strong> &mdash; delegación jerárquica con aislamiento de contexto</p>
+      </div>
+    </div>
+    <div style="display:flex; align-items:flex-start; gap:24px; padding:16px 0; border-bottom:1px solid rgba(255,255,255,0.06);">
+      <span class="big-number dim" style="font-size:2rem; min-width:40px;">2</span>
+      <div>
+        <p style="font-size:1.2rem;"><span class="skill-c"><strong>Skills</strong></span> &mdash; habilidades modulares con descubrimiento progresivo</p>
+      </div>
+    </div>
+    <div style="display:flex; align-items:flex-start; gap:24px; padding:16px 0; border-bottom:1px solid rgba(255,255,255,0.06);">
+      <span class="big-number dim" style="font-size:2rem; min-width:40px;">3</span>
+      <div>
+        <p style="font-size:1.2rem;"><span class="memory-c"><strong>Memory</strong></span> &mdash; memoria persistente entre sesiones</p>
+      </div>
+    </div>
+    <div style="display:flex; align-items:flex-start; gap:24px; padding:16px 0;">
+      <span class="big-number dim" style="font-size:2rem; min-width:40px;">4</span>
+      <div>
+        <p style="font-size:1.2rem;"><span class="dream-c"><strong>Dreams</strong></span> &mdash; consolidación offline inspirada en el sueño biológico</p>
+      </div>
+    </div>
+  </div>
+  <div class="highlight-box" style="margin-top:24px; border-color: var(--text-dim);">
+    Hoy Anthropic soporta <strong>exactamente esta arquitectura</strong> en su Managed Agents API y Claude Code.
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- SLIDE 3: THE GOAL -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="slide" data-slide="3">
+  <h2>El objetivo: <span class="yellow-c">más allá de un solo proveedor</span></h2>
+  <p class="dim" style="margin-bottom:28px;">Si la arquitectura es buena, debería funcionar con cualquier LLM.</p>
+  <div class="grid-3" style="margin-top:12px;">
+    <div class="card" style="text-align:center; border-top:3px solid var(--dream-color);">
+      <p class="dim" style="font-size:0.85rem; text-transform:uppercase;">Hoy</p>
+      <p style="font-size:1.3rem; font-weight:700; margin-top:8px;">Anthropic</p>
+      <p style="font-size:0.95rem; margin-top:8px;" class="dim">Claude Code, Agent SDK<br>Skills + Memory + Dreams nativos</p>
+    </div>
+    <div class="card" style="text-align:center; border-top:3px solid var(--accent2);">
+      <p class="dim" style="font-size:0.85rem; text-transform:uppercase;">Lo que demostramos</p>
+      <p style="font-size:1.3rem; font-weight:700; margin-top:8px;">Otros LLMs</p>
+      <p style="font-size:0.95rem; margin-top:8px;" class="dim">Gemini 2.5 Flash, Gemma 4<br>Mismas primitivas, API abierta</p>
+    </div>
+    <div class="card" style="text-align:center; border-top:3px solid var(--green);">
+      <p class="dim" style="font-size:0.85rem; text-transform:uppercase;">El siguiente paso</p>
+      <p style="font-size:1.3rem; font-weight:700; margin-top:8px;">On-Premise</p>
+      <p style="font-size:0.95rem; margin-top:8px;" class="dim">Modelos locales, API open source<br>Sin dependencias de cloud</p>
+    </div>
+  </div>
+  <div style="margin-top:36px; text-align:center;">
+    <div class="diagram" style="justify-content:center;">
+      <div class="box box-dream" style="min-width:180px;">
+        <div class="dream-c" style="font-weight:700;">Claude</div>
+        <div class="dim" style="font-size:0.85rem;">Anthropic SDK</div>
+      </div>
+      <div class="arrow">&rarr;</div>
+      <div class="box" style="min-width:180px; border-color:var(--accent2);">
+        <div class="yellow-c" style="font-weight:700;">Gemini / Gemma</div>
+        <div class="dim" style="font-size:0.85rem;">REST API directa</div>
+      </div>
+      <div class="arrow">&rarr;</div>
+      <div class="box" style="min-width:180px; border-color:var(--green);">
+        <div class="green-c" style="font-weight:700;">Cualquier LLM</div>
+        <div class="dim" style="font-size:0.85rem;">Open source, on-prem</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- SLIDE 4: WHAT IS A SUB-AGENT -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="slide" data-slide="4">
+  <h2>¿Qué es un <span class="bright">Sub-Agente</span>?</h2>
+  <p class="dim" style="margin-bottom:20px;">Un agente especializado al que el orquestador delega tareas.</p>
+  <div class="grid-2" style="margin-top:12px;">
+    <div>
+      <div class="code-block" style="font-size:0.85rem;"><span class="comment"># .claude/agents/data-validator.md</span>
+<span class="keyword">---</span>
+<span class="fn">name:</span> <span class="string">cardiac-data-validator</span>
+<span class="fn">description:</span> <span class="string">Valida datos clínicos.</span>
+  <span class="string">Usar para QA de datos.</span>
+<span class="fn">model:</span> <span class="string">claude-sonnet-4-6</span>
+<span class="fn">tools:</span> <span class="string">Read, Bash, Grep</span>
+<span class="fn">skills:</span> <span class="string">[pointcloud-metrics]</span>
+<span class="fn">mcpServers:</span>
+  <span class="fn">orthanc:</span>
+    <span class="fn">type:</span> <span class="string">http</span>
+    <span class="fn">url:</span> <span class="string">https://orthanc/mcp</span>
+<span class="keyword">---</span>
+Eres un especialista en QA de datos
+clínicos. Dado un shape reconstruido
+y un point cloud, computa métricas...</div>
+    </div>
+    <div style="display:flex; flex-direction:column; justify-content:center; gap:16px;">
+      <div class="card">
+        <h3 class="bright">Archivo Markdown</h3>
+        <p style="font-size:1.05rem;">YAML frontmatter + instrucciones en texto plano. Legible y versionable.</p>
+      </div>
+      <div class="card">
+        <h3 class="bright">Aislamiento de contexto</h3>
+        <p style="font-size:1.05rem;">Cada sub-agente tiene su propia ventana de contexto. Solo un <strong>resumen</strong> vuelve al orquestador.</p>
+      </div>
+      <div class="card">
+        <h3 class="bright">Scoping por agente</h3>
+        <p style="font-size:1.05rem;">Cada uno declara sus <span class="skill-c">Skills</span>, <span class="memory-c">MCP servers</span> y herramientas permitidas.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- SLIDE 5: WHAT IS A SKILL -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="slide" data-slide="5">
+  <span class="tag tag-skill" style="margin-bottom:20px;">Concepto</span>
+  <h2>¿Qué es un <span class="skill-c">Skill</span>?</h2>
+  <div class="grid-2" style="margin-top:20px;">
+    <div>
+      <p style="font-size:1.2rem; margin-bottom:20px;">Instrucciones modulares en <strong>Markdown</strong> que el agente carga <strong>on-demand</strong>.</p>
+      <div class="card card-skill">
+        <h3 class="skill-c">¿Por qué "Skill"?</h3>
+        <p style="font-size:1.05rem; margin-top:8px;">
+          Como las habilidades humanas: <strong>no piensas en todas a la vez</strong>.
+          Cuando necesitas cocinar, activas tus habilidades de cocina.
+          Cuando necesitas conducir, activas las de conducir.
+        </p>
+        <p style="font-size:1.05rem; margin-top:12px;">
+          El agente funciona igual: ve un catálogo de habilidades disponibles y <strong>decide cuál cargar</strong> según la tarea.
+        </p>
+      </div>
+    </div>
+    <div>
+      <h3 class="dim" style="font-size:0.9rem; text-transform:uppercase; letter-spacing:0.05em;">El mecanismo</h3>
+      <div class="diagram" style="flex-direction:column; gap:12px; margin-top:12px;">
+        <div class="box box-skill" style="width:100%; text-align:left;">
+          <div class="dim" style="font-size:0.8rem; text-transform:uppercase; margin-bottom:4px;">Paso 1: System Prompt</div>
+          <div style="font-size:1rem;">Solo ve <strong>nombre + descripción corta</strong></div>
+          <div class="dim" style="font-size:0.85rem; margin-top:4px;">patrol-route: "Navigate checkpoints..."</div>
+        </div>
+        <div class="arrow" style="font-size:1.2rem;">&#8595; El agente decide que lo necesita</div>
+        <div class="box box-skill" style="width:100%; text-align:left;">
+          <div class="dim" style="font-size:0.8rem; text-transform:uppercase; margin-bottom:4px;">Paso 2: Tool Call</div>
+          <div style="font-size:1rem;" class="mono">load_skill("patrol-route")</div>
+        </div>
+        <div class="arrow" style="font-size:1.2rem;">&#8595; Se inyectan las instrucciones completas</div>
+        <div class="box box-skill" style="width:100%; text-align:left;">
+          <div class="dim" style="font-size:0.8rem; text-transform:uppercase; margin-bottom:4px;">Paso 3: Contexto expandido</div>
+          <div style="font-size:1rem;">43 líneas de procedimiento detallado</div>
+          <div class="dim" style="font-size:0.85rem; margin-top:4px;">Progressive disclosure &mdash; solo lo que necesita</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- SLIDE 6: WHAT IS MEMORY -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="slide" data-slide="6">
+  <span class="tag tag-memory" style="margin-bottom:20px;">Concepto</span>
+  <h2>¿Qué es <span class="memory-c">Memory</span>?</h2>
+  <div class="grid-2" style="margin-top:20px;">
+    <div>
+      <p style="font-size:1.2rem; margin-bottom:20px;">Almacenamiento <strong>persistente</strong> en archivos Markdown que sobrevive entre sesiones.</p>
+      <div class="card card-memory">
+        <h3 class="memory-c">¿Por qué "Memory"?</h3>
+        <p style="font-size:1.05rem; margin-top:8px;">
+          Porque funciona como la <strong>memoria episódica humana</strong>:
+          el agente recuerda lo que vivió, lo que observó, y lo que otros le dijeron.
+        </p>
+        <p style="font-size:1.05rem; margin-top:12px;">
+          No es un <em>database</em> &mdash; es <strong>conocimiento contextual</strong> que el agente lee, escribe y actualiza con sus propias palabras.
+        </p>
+      </div>
+    </div>
+    <div>
+      <h3 class="dim" style="font-size:0.9rem; text-transform:uppercase; letter-spacing:0.05em;">El mecanismo</h3>
+      <div style="margin-top:12px;">
+        <div class="card" style="margin-bottom:12px; padding:20px;">
+          <p style="font-size:1rem;"><span class="memory-c" style="font-weight:700;">1. Stores</span> &mdash; Carpetas temáticas con manifiesto</p>
+          <p class="dim" style="font-size:0.9rem; margin-top:4px;">patrol-log/, preferences/, consolidated/</p>
+        </div>
+        <div class="card" style="margin-bottom:12px; padding:20px;">
+          <p style="font-size:1rem;"><span class="memory-c" style="font-weight:700;">2. Documentos Markdown</span> &mdash; Legibles por humanos</p>
+          <p class="dim" style="font-size:0.9rem; margin-top:4px;">El agente escribe en lenguaje natural</p>
+        </div>
+        <div class="card" style="margin-bottom:12px; padding:20px;">
+          <p style="font-size:1rem;"><span class="memory-c" style="font-weight:700;">3. Versionado SHA256</span> &mdash; Integridad garantizada</p>
+          <p class="dim" style="font-size:0.9rem; margin-top:4px;">Backup automático: v1 → v2 → v3...</p>
+        </div>
+        <div class="card" style="padding:20px;">
+          <p style="font-size:1rem;"><span class="memory-c" style="font-weight:700;">4. Auto-inyección</span> &mdash; Manifiestos en el system prompt</p>
+          <p class="dim" style="font-size:0.9rem; margin-top:4px;">El agente sabe qué memorias existen sin buscar</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- SLIDE 7: WHAT ARE DREAMS -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="slide" data-slide="7">
+  <span class="tag tag-dream" style="margin-bottom:20px;">Concepto</span>
+  <h2>¿Qué son los <span class="dream-c">Dreams</span>?</h2>
+  <div class="grid-2" style="margin-top:20px;">
+    <div>
+      <p style="font-size:1.2rem; margin-bottom:20px;">Consolidación <strong>offline</strong> donde un LLM reorganiza las memorias del agente.</p>
+      <div class="card card-dream">
+        <h3 class="dream-c">¿Por qué "Dreams"?</h3>
+        <p style="font-size:1.05rem; margin-top:8px;">
+          Porque replica lo que hace el <strong>sueño biológico</strong>:
+        </p>
+        <ul style="list-style:none; padding:0; margin-top:12px;">
+          <li style="padding:6px 0; font-size:1.05rem;"><span class="dream-c">SWS</span> &mdash; Replay de memorias recientes</li>
+          <li style="padding:6px 0; font-size:1.05rem;"><span class="dream-c">REM</span> &mdash; Reorganización, nuevas conexiones</li>
+          <li style="padding:6px 0; font-size:1.05rem;"><span class="dream-c">Consolidación</span> &mdash; Corto plazo → largo plazo</li>
+        </ul>
+        <p style="font-size:1.05rem; margin-top:12px;">
+          El paralelo <strong>no es metafórico &mdash; es funcional</strong>. Mismo proceso, mismo resultado.
+        </p>
+      </div>
+    </div>
+    <div>
+      <h3 class="dim" style="font-size:0.9rem; text-transform:uppercase; letter-spacing:0.05em;">El mecanismo</h3>
+      <div class="diagram" style="flex-direction:column; gap:12px; margin-top:12px;">
+        <div class="box" style="width:100%; text-align:left;">
+          <div class="dim" style="font-size:0.8rem; text-transform:uppercase; margin-bottom:4px;">Input</div>
+          <div style="font-size:1rem;">Memorias existentes + transcriptos de sesión</div>
+          <div class="dim" style="font-size:0.85rem; margin-top:4px;">Todo lo que el agente vivió y escribió</div>
+        </div>
+        <div class="arrow" style="font-size:1.2rem;">&#8595; LLM pass offline</div>
+        <div class="box box-dream" style="width:100%; text-align:left;">
+          <div class="dim" style="font-size:0.8rem; text-transform:uppercase; margin-bottom:4px;">Proceso</div>
+          <div style="font-size:1rem;" class="dream-c">El LLM analiza, deduplica, categoriza</div>
+          <div class="dim" style="font-size:0.85rem; margin-top:4px;">Conecta información, extrae insights</div>
+        </div>
+        <div class="arrow" style="font-size:1.2rem;">&#8595; Estructura emergente</div>
+        <div class="box box-dream" style="width:100%; text-align:left;">
+          <div class="dim" style="font-size:0.8rem; text-transform:uppercase; margin-bottom:4px;">Output</div>
+          <div style="font-size:1rem;" class="dream-c">Documentos organizados por categoría</div>
+          <div class="dim" style="font-size:0.85rem; margin-top:4px;">La estructura EMERGE del LLM &mdash; no la definimos nosotros</div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:16px; padding:16px 20px; text-align:center;">
+        <p style="font-size:1rem;">Corre <strong>entre sesiones</strong> &mdash; no durante la operación</p>
+        <p class="dim" style="font-size:0.9rem;">El agente "duerme" y se despierta más inteligente</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- SLIDE 8: ANTHROPIC SDK vs GOOGLE ADK -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="slide" data-slide="8">
+  <h2>¿Por qué no usar un framework existente?</h2>
+  <p class="dim" style="margin-bottom:20px;">Anthropic Agent SDK vs Google ADK &mdash; optimizan para cosas distintas.</p>
+  <table class="compare-table" style="margin-top:16px;">
+    <tr>
+      <th style="width:180px;"></th>
+      <th style="color:var(--dream-color);">Anthropic Agent SDK</th>
+      <th style="color:var(--accent2);">Google ADK</th>
+    </tr>
+    <tr>
+      <td class="label">Modelo</td>
+      <td>Multi-agent: orchestrator + subagents</td>
+      <td>SequentialAgent, LoopAgent, ParallelAgent</td>
+    </tr>
+    <tr>
+      <td class="label">Topología</td>
+      <td>Jerárquica (orquestador → workers)</td>
+      <td>Explícita (secuencial, loops, fan-out)</td>
+    </tr>
+    <tr>
+      <td class="label">Skills/MCP</td>
+      <td><span class="green-c">Nativos</span> &mdash; plug and play</td>
+      <td>Adaptadores manuales</td>
+    </tr>
+    <tr>
+      <td class="label">Modelos</td>
+      <td><span class="accent-c">Solo Claude</span></td>
+      <td><span class="green-c">Agnóstico</span> &mdash; Gemini, Claude, local</td>
+    </tr>
+    <tr>
+      <td class="label">Lenguajes</td>
+      <td>TypeScript</td>
+      <td>Python, TS, Go, Java, Kotlin</td>
+    </tr>
+    <tr>
+      <td class="label">Velocidad proto</td>
+      <td><span class="green-c">Más rápido</span> si ya usas Claude</td>
+      <td>Más curva pero más completo</td>
+    </tr>
+    <tr>
+      <td class="label">Persistencia</td>
+      <td><span class="accent-c">No built-in</span> &mdash; DIY</td>
+      <td>Session state compartido</td>
+    </tr>
+  </table>
+  <div class="highlight-box" style="margin-top:24px; border-color: var(--text-dim);">
+    El SDK es la vía rápida si estás en Claude. ADK si necesitas múltiples modelos y topologías complejas.
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- SLIDE 9: OUR CHOICE -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="slide" data-slide="9">
+  <h2>Nuestra elección: <span style="background: linear-gradient(135deg, var(--skill-color), var(--memory-color), var(--dream-color)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">lo mejor de ambos mundos</span></h2>
+  <div class="grid-2" style="margin-top:28px;">
+    <div>
+      <div style="display:flex; align-items:flex-start; gap:20px; padding:16px 0; border-bottom:1px solid rgba(255,255,255,0.06);">
+        <span class="big-number bright" style="font-size:2rem; min-width:40px;">1</span>
+        <div>
+          <h3 class="bright">Sub-agentes en Markdown</h3>
+          <p style="font-size:1.05rem;" class="dim">Definidos como archivos .md con YAML frontmatter &mdash; versionables, legibles, portables.</p>
+        </div>
+      </div>
+      <div style="display:flex; align-items:flex-start; gap:20px; padding:16px 0; border-bottom:1px solid rgba(255,255,255,0.06);">
+        <span class="big-number skill-c" style="font-size:2rem; min-width:40px;">2</span>
+        <div>
+          <h3 class="skill-c">Skills como progressive disclosure</h3>
+          <p style="font-size:1.05rem;" class="dim">El agente decide qué cargar. No nosotros.</p>
+        </div>
+      </div>
+      <div style="display:flex; align-items:flex-start; gap:20px; padding:16px 0; border-bottom:1px solid rgba(255,255,255,0.06);">
+        <span class="big-number memory-c" style="font-size:2rem; min-width:40px;">3</span>
+        <div>
+          <h3 class="memory-c">MCP Connectors por agente</h3>
+          <p style="font-size:1.05rem;" class="dim">Cada sub-agente declara sus propios servidores MCP.</p>
+        </div>
+      </div>
+      <div style="display:flex; align-items:flex-start; gap:20px; padding:16px 0;">
+        <span class="big-number dream-c" style="font-size:2rem; min-width:40px;">4</span>
+        <div>
+          <h3 class="dream-c">Dreams como puente entre sesiones</h3>
+          <p style="font-size:1.05rem;" class="dim">Consolidación offline que ningún framework ofrece built-in.</p>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex; flex-direction:column; justify-content:center;">
+      <div class="card" style="border: 2px solid rgba(255,255,255,0.15); padding:28px; text-align:center;">
+        <p style="font-size:1rem; text-transform:uppercase; letter-spacing:0.05em;" class="dim">La arquitectura de Anthropic</p>
+        <p style="font-size:1.6rem; font-weight:800; margin-top:12px;">pero <span class="yellow-c">model-agnostic</span></p>
+        <div style="margin-top:24px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+          <span class="tag" style="background:rgba(177,151,252,0.15); color:var(--dream-color); border:1px solid var(--dream-border);">Claude</span>
+          <span class="tag" style="background:rgba(255,212,59,0.15); color:var(--accent2); border:1px solid rgba(255,212,59,0.3);">Gemini</span>
+          <span class="tag" style="background:rgba(81,207,102,0.15); color:var(--green); border:1px solid rgba(81,207,102,0.3);">Gemma 4</span>
+          <span class="tag" style="background:rgba(255,255,255,0.08); color:var(--text); border:1px solid rgba(255,255,255,0.15);">Tu modelo</span>
+        </div>
+      </div>
+      <div class="card" style="margin-top:16px; padding:20px; text-align:center;">
+        <p style="font-size:1.1rem;">Todo es <span class="mono bright">function calls</span> + <span class="mono bright">Markdown</span></p>
+        <p class="dim" style="font-size:0.95rem; margin-top:8px;">Cualquier modelo con tool use puede usarlo</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- SLIDE 10: THE PROBLEM — "Los agentes amnésicos" -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="slide" data-slide="10">
+  <h2>Pero primero: los agentes de hoy son <span class="accent-c">amnésicos</span></h2>
   <div class="grid-2" style="margin-top:32px;">
     <div>
       <ul style="list-style:none; padding:0;">
@@ -551,9 +926,9 @@
 </div>
 
 <!-- ══════════════════════════════════════════════════════ -->
-<!-- SLIDE 3: THREE PRIMITIVES -->
+<!-- SLIDE 11: THREE PRIMITIVES -->
 <!-- ══════════════════════════════════════════════════════ -->
-<div class="slide" data-slide="3">
+<div class="slide" data-slide="11">
   <h2>La solución: tres primitivas</h2>
   <div class="grid-3" style="margin-top:32px;">
     <div class="card card-skill">
@@ -581,9 +956,9 @@
 </div>
 
 <!-- ══════════════════════════════════════════════════════ -->
-<!-- SLIDE 4: SKILLS - WHAT -->
+<!-- SLIDE 12: SKILLS - WHAT -->
 <!-- ══════════════════════════════════════════════════════ -->
-<div class="slide" data-slide="4">
+<div class="slide" data-slide="12">
   <span class="tag tag-skill" style="margin-bottom:20px;">Skills</span>
   <h2>Descubrimiento progresivo de habilidades</h2>
   <div class="grid-2" style="margin-top:24px;">
@@ -616,9 +991,9 @@
 </div>
 
 <!-- ══════════════════════════════════════════════════════ -->
-<!-- SLIDE 5: SKILLS - REAL DATA -->
+<!-- SLIDE 13: SKILLS - REAL DATA -->
 <!-- ══════════════════════════════════════════════════════ -->
-<div class="slide" data-slide="5">
+<div class="slide" data-slide="13">
   <span class="tag tag-skill" style="margin-bottom:20px;">Skills &mdash; Dato real</span>
   <h2>El agente elige qué cargar</h2>
   <div class="code-block" style="font-size:1.05rem; margin-top:24px;"><span class="dim">Turn 2:</span>
@@ -644,9 +1019,9 @@
 </div>
 
 <!-- ══════════════════════════════════════════════════════ -->
-<!-- SLIDE 6: MEMORY - WHAT -->
+<!-- SLIDE 14: MEMORY - WHAT -->
 <!-- ══════════════════════════════════════════════════════ -->
-<div class="slide" data-slide="6">
+<div class="slide" data-slide="14">
   <span class="tag tag-memory" style="margin-bottom:20px;">Memory</span>
   <h2>Memoria persistente entre sesiones</h2>
   <div class="grid-2" style="margin-top:20px;">
@@ -685,9 +1060,9 @@
 </div>
 
 <!-- ══════════════════════════════════════════════════════ -->
-<!-- SLIDE 7: MEMORY - RUN 1 vs RUN 2 -->
+<!-- SLIDE 15: MEMORY - RUN 1 vs RUN 2 -->
 <!-- ══════════════════════════════════════════════════════ -->
-<div class="slide" data-slide="7">
+<div class="slide" data-slide="15">
   <span class="tag tag-memory" style="margin-bottom:20px;">Memory &mdash; En acción</span>
   <h2>El agente que <span class="memory-c">recuerda</span></h2>
   <div class="grid-2" style="margin-top:20px;">
@@ -724,9 +1099,9 @@
 </div>
 
 <!-- ══════════════════════════════════════════════════════ -->
-<!-- SLIDE 8: DREAMS - WHAT -->
+<!-- SLIDE 16: DREAMS - WHAT -->
 <!-- ══════════════════════════════════════════════════════ -->
-<div class="slide" data-slide="8">
+<div class="slide" data-slide="16">
   <span class="tag tag-dream" style="margin-bottom:20px;">Dreams</span>
   <h2>Consolidación offline inspirada en el <span class="dream-c">sueño biológico</span></h2>
   <div class="diagram" style="margin-top:36px;">
@@ -771,9 +1146,9 @@
 </div>
 
 <!-- ══════════════════════════════════════════════════════ -->
-<!-- SLIDE 9: DREAMS - REAL OUTPUT -->
+<!-- SLIDE 17: DREAMS - REAL OUTPUT -->
 <!-- ══════════════════════════════════════════════════════ -->
-<div class="slide" data-slide="9">
+<div class="slide" data-slide="17">
   <span class="tag tag-dream" style="margin-bottom:20px;">Dreams &mdash; Output real</span>
   <h2>De log plano a <span class="dream-c">conocimiento estructurado</span></h2>
   <div class="grid-2" style="margin-top:20px;">
@@ -811,9 +1186,9 @@ Staff: Greeted Carlos..."</span></div>
 </div>
 
 <!-- ══════════════════════════════════════════════════════ -->
-<!-- SLIDE 10: ANTHROPIC'S IMPLEMENTATION -->
+<!-- SLIDE 18: ANTHROPIC'S IMPLEMENTATION -->
 <!-- ══════════════════════════════════════════════════════ -->
-<div class="slide" data-slide="10">
+<div class="slide" data-slide="18">
   <h2>Cómo lo implementa <span class="bright">Anthropic</span></h2>
   <p class="dim" style="margin-bottom:24px;">Claude Code &amp; Managed Agents</p>
   <div class="grid-3">
@@ -851,9 +1226,9 @@ Staff: Greeted Carlos..."</span></div>
 </div>
 
 <!-- ══════════════════════════════════════════════════════ -->
-<!-- SLIDE 11: OUR GEMINI IMPLEMENTATION -->
+<!-- SLIDE 19: OUR GEMINI IMPLEMENTATION -->
 <!-- ══════════════════════════════════════════════════════ -->
-<div class="slide" data-slide="11">
+<div class="slide" data-slide="19">
   <h2>Nuestra implementación con <span class="yellow-c">Gemini 2.5 Flash</span></h2>
   <p class="dim" style="margin-bottom:20px;">Sin APIs propietarias &mdash; REST API directa</p>
   <div class="grid-2">
@@ -899,9 +1274,9 @@ POST <span class="string">generativelanguage.googleapis.com
 </div>
 
 <!-- ══════════════════════════════════════════════════════ -->
-<!-- SLIDE 12: UNIFIED INTERFACE -->
+<!-- SLIDE 20: UNIFIED INTERFACE -->
 <!-- ══════════════════════════════════════════════════════ -->
-<div class="slide" data-slide="12">
+<div class="slide" data-slide="20">
   <h2>Una sola interfaz: <span class="mono bright">Tool Calls</span></h2>
   <div class="code-block" style="font-size:1.05rem; margin-top:28px; max-width:800px;"><span class="comment">// Las 12 herramientas — mismo array, misma interfaz</span>
 
@@ -926,9 +1301,9 @@ POST <span class="string">generativelanguage.googleapis.com
 </div>
 
 <!-- ══════════════════════════════════════════════════════ -->
-<!-- SLIDE 13: DEMO SETUP -->
+<!-- SLIDE 21: DEMO SETUP -->
 <!-- ══════════════════════════════════════════════════════ -->
-<div class="slide" data-slide="13">
+<div class="slide" data-slide="21">
   <div class="section-num">DEMO</div>
   <h2>Demo en vivo &mdash; <span class="bright">RoClaw Patrol Robot</span></h2>
   <div class="grid-2" style="margin-top:24px;">
@@ -963,9 +1338,9 @@ POST <span class="string">generativelanguage.googleapis.com
 </div>
 
 <!-- ══════════════════════════════════════════════════════ -->
-<!-- SLIDE 14: DEMO RUN 1 -->
+<!-- SLIDE 22: DEMO RUN 1 -->
 <!-- ══════════════════════════════════════════════════════ -->
-<div class="slide" data-slide="14">
+<div class="slide" data-slide="22">
   <span class="tag" style="background:rgba(255,107,107,0.1); color:var(--accent); border:1px solid rgba(255,107,107,0.3); margin-bottom:16px;">Run 1 &mdash; Cold Start</span>
   <h2>Primera patrulla, memoria vacía</h2>
   <ul class="timeline" style="margin-top:20px;">
@@ -991,9 +1366,9 @@ POST <span class="string">generativelanguage.googleapis.com
 </div>
 
 <!-- ══════════════════════════════════════════════════════ -->
-<!-- SLIDE 15: DEMO DREAM -->
+<!-- SLIDE 23: DEMO DREAM -->
 <!-- ══════════════════════════════════════════════════════ -->
-<div class="slide" data-slide="15">
+<div class="slide" data-slide="23">
   <span class="tag tag-dream" style="margin-bottom:16px;">Dream &mdash; Consolidación</span>
   <h2>El robot <span class="dream-c">"duerme"</span> y reorganiza su experiencia</h2>
   <div class="grid-2" style="margin-top:24px;">
@@ -1033,9 +1408,9 @@ POST <span class="string">generativelanguage.googleapis.com
 </div>
 
 <!-- ══════════════════════════════════════════════════════ -->
-<!-- SLIDE 16: DEMO RUN 2 -->
+<!-- SLIDE 24: DEMO RUN 2 -->
 <!-- ══════════════════════════════════════════════════════ -->
-<div class="slide" data-slide="16">
+<div class="slide" data-slide="24">
   <span class="tag" style="background:rgba(81,207,102,0.1); color:var(--green); border:1px solid rgba(81,207,102,0.3); margin-bottom:16px;">Run 2 &mdash; Warm Start</span>
   <h2>El robot recuerda y se <span class="green-c">adapta</span></h2>
   <table class="compare-table" style="margin-top:24px;">
@@ -1081,9 +1456,9 @@ POST <span class="string">generativelanguage.googleapis.com
 </div>
 
 <!-- ══════════════════════════════════════════════════════ -->
-<!-- SLIDE 17: ARCHITECTURE -->
+<!-- SLIDE 25: ARCHITECTURE -->
 <!-- ══════════════════════════════════════════════════════ -->
-<div class="slide" data-slide="17">
+<div class="slide" data-slide="25">
   <h2>Arquitectura &mdash; <span class="dim">8 archivos TypeScript</span></h2>
   <div class="grid-2" style="margin-top:20px;">
     <div class="file-tree" style="font-size:0.9rem;"><span class="folder">src/</span>
@@ -1122,9 +1497,9 @@ POST <span class="string">generativelanguage.googleapis.com
 </div>
 
 <!-- ══════════════════════════════════════════════════════ -->
-<!-- SLIDE 18: BIOLOGY -->
+<!-- SLIDE 26: BIOLOGY -->
 <!-- ══════════════════════════════════════════════════════ -->
-<div class="slide" data-slide="18">
+<div class="slide" data-slide="26">
   <h2>¿Por qué <span class="dream-c">"Dreams"</span>? &mdash; La analogía biológica</h2>
   <div class="grid-2" style="margin-top:28px;">
     <div class="card">
@@ -1152,9 +1527,9 @@ POST <span class="string">generativelanguage.googleapis.com
 </div>
 
 <!-- ══════════════════════════════════════════════════════ -->
-<!-- SLIDE 19: APPLICATIONS -->
+<!-- SLIDE 27: APPLICATIONS -->
 <!-- ══════════════════════════════════════════════════════ -->
-<div class="slide" data-slide="19">
+<div class="slide" data-slide="27">
   <h2>Dónde más aplican estas primitivas</h2>
   <div class="grid-4" style="margin-top:28px;">
     <div class="card">
@@ -1193,9 +1568,9 @@ POST <span class="string">generativelanguage.googleapis.com
 </div>
 
 <!-- ══════════════════════════════════════════════════════ -->
-<!-- SLIDE 20: THE FUTURE -->
+<!-- SLIDE 28: THE FUTURE -->
 <!-- ══════════════════════════════════════════════════════ -->
-<div class="slide" data-slide="20">
+<div class="slide" data-slide="28">
   <h2>Lo que viene &mdash; Agentes que <span class="skill-c">evolucionan</span></h2>
   <div style="margin-top:32px;">
     <div style="display:flex; align-items:flex-start; gap:24px; padding:20px 0; border-bottom:1px solid rgba(255,255,255,0.06);">
@@ -1234,9 +1609,9 @@ POST <span class="string">generativelanguage.googleapis.com
 </div>
 
 <!-- ══════════════════════════════════════════════════════ -->
-<!-- SLIDE 21: HISTORA -->
+<!-- SLIDE 29: HISTORA -->
 <!-- ══════════════════════════════════════════════════════ -->
-<div class="slide slide-section" data-slide="21">
+<div class="slide slide-section" data-slide="29">
   <div>
     <p class="dim" style="font-size:1rem; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:24px;">Histora</p>
     <h1 style="font-size:2.4rem; background:none; -webkit-text-fill-color:var(--text-bright);">Muchas de las tecnologías presentadas<br>en esta charla son parte del próximo<br><span style="background: linear-gradient(135deg, var(--skill-color), var(--memory-color), var(--dream-color)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">stack tecnológico de Histora</span>.</h1>
@@ -1244,9 +1619,9 @@ POST <span class="string">generativelanguage.googleapis.com
 </div>
 
 <!-- ══════════════════════════════════════════════════════ -->
-<!-- SLIDE 22: CLOSING -->
+<!-- SLIDE 30: CLOSING -->
 <!-- ══════════════════════════════════════════════════════ -->
-<div class="slide slide-title" data-slide="22">
+<div class="slide slide-title" data-slide="30">
   <div>
     <h1 style="font-size:3rem;">¿Preguntas?</h1>
     <p class="subtitle" style="max-width:700px; margin:24px auto 0;">
@@ -1274,9 +1649,9 @@ POST <span class="string">generativelanguage.googleapis.com
 
 <!-- ── Navigation bar ──────────────────────────────────── -->
 <div class="nav-bar">
-  <span class="slide-num" id="slideNum">1 / 22</span>
+  <span class="slide-num" id="slideNum">1 / 30</span>
   <div class="progress">
-    <div class="progress-fill" id="progressFill" style="width:4.5%"></div>
+    <div class="progress-fill" id="progressFill" style="width:3.3%"></div>
   </div>
   <span class="slide-num dim" style="font-size:0.8rem;">&#8592; &#8594; o click para navegar</span>
 </div>
