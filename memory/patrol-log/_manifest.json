@@ -1,0 +1,8 @@
+{
+  "name": "patrol-log",
+  "description": "Daily patrol logs — checkpoint statuses, timestamps, incidents, and anomaly reports.",
+  "instructions": "Write a summary after each patrol with checkpoint statuses. Read before starting a new patrol to check for known issues or incidents from previous patrols.",
+  "access": "read_write",
+  "created": "2026-05-12T00:00:00Z",
+  "maxSizeBytes": 102400
+}

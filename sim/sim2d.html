@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>RoClaw — Skills, Memory & Dreams</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #1a1a2e; color: #e0e0e0; font-family: 'Courier New', monospace; height: 100vh;
+    display: grid; grid-template-columns: 620px 1fr; grid-template-rows: auto 1fr auto; }
+
+  /* ── Top bar ─────────────────────────────────── */
+  #top-bar { grid-column: 1 / -1; background: #0f3460; padding: 10px 20px;
+    display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #333; }
+  #top-bar h1 { font-size: 16px; color: #53cfcf; }
+  #top-bar .info { font-size: 12px; color: #888; display: flex; gap: 12px; align-items: center; }
+  #top-bar .info span { color: #7bed9f; }
+
+  /* ── Arena section (left) ───────────────────── */
+  #arena-section { display: flex; flex-direction: column; border-right: 2px solid #333; }
+  #arena-wrap { flex: 0 0 auto; padding: 10px; background: #16213e; }
+  canvas { display: block; }
+  #status-bar { display: flex; gap: 16px; padding: 8px 10px; background: #0f3460; font-size: 11px;
+    flex-wrap: wrap; }
+  #status-bar .label { color: #666; }
+  #status-bar .val { color: #e94560; font-weight: bold; }
+
+  /* ── Agent log ──────────────────────────────── */
+  #agent-log { flex: 1; overflow-y: auto; padding: 8px 10px; font-size: 11px; line-height: 1.6;
+    background: #16213e; min-height: 80px; }
+  .log-entry { margin: 1px 0; padding: 1px 0; }
+  .log-time { color: #555; margin-right: 4px; }
+  .log-type { font-weight: bold; margin-right: 4px; }
+  .log-nav .log-type { color: #7bed9f; }
+  .log-speak .log-type { color: #53cfcf; }
+  .log-speak { background: rgba(83,207,207,0.05); padding: 2px 4px; border-radius: 3px; }
+  .log-listen .log-type { color: #f5c542; }
+  .log-listen { background: rgba(245,197,66,0.05); padding: 2px 4px; border-radius: 3px; }
+  .log-skill .log-type { color: #a29bfe; }
+  .log-skill { background: rgba(162,155,254,0.08); padding: 2px 4px; border-radius: 3px; }
+  .log-memory .log-type { color: #e94560; }
+  .log-memory { background: rgba(233,69,96,0.08); padding: 2px 4px; border-radius: 3px; }
+  .log-tool .log-type { color: #888; }
+  .log-dream .log-type { color: #d4a5ff; }
+  .log-info .log-type { color: #555; }
+  .log-done .log-type { color: #2ed573; font-weight: bold; }
+  .log-done { background: rgba(46,213,115,0.08); padding: 2px 4px; border-radius: 3px; }
+
+  /* ── Panel section (right) ──────────────────── */
+  #panel-section { display: flex; flex-direction: column; overflow: hidden; }
+
+  /* Tabs */
+  #tab-bar { display: flex; background: #0f3460; border-bottom: 2px solid #333; }
+  .tab { padding: 10px 20px; cursor: pointer; font-size: 13px; font-weight: bold;
+    color: #888; border-bottom: 3px solid transparent; transition: all 0.2s;
+    display: flex; align-items: center; gap: 6px; }
+  .tab:hover { color: #ccc; }
+  .tab.active { color: #53cfcf; border-bottom-color: #53cfcf; }
+  .tab .tab-dot { width: 8px; height: 8px; border-radius: 50%; display: none; }
+  .tab .tab-dot.on { display: inline-block; }
+  .tab-panel { display: none; flex: 1; overflow-y: auto; padding: 16px; }
+  .tab-panel.active { display: block; }
+
+  /* ── Skills panel ───────────────────────────── */
+  .skill-card { background: #16213e; border: 1px solid #333; border-radius: 8px;
+    padding: 12px 16px; margin-bottom: 10px; cursor: pointer; transition: all 0.3s; }
+  .skill-card:hover { border-color: #53cfcf; }
+  .skill-card.skill-active { border-color: #7bed9f; box-shadow: 0 0 12px rgba(123,237,159,0.3);
+    animation: skillPulse 2s infinite; }
+  @keyframes skillPulse { 0%,100% { box-shadow: 0 0 8px rgba(123,237,159,0.2); }
+    50% { box-shadow: 0 0 16px rgba(123,237,159,0.5); } }
+  .skill-name { font-size: 14px; font-weight: bold; color: #53cfcf; display: flex; align-items: center; }
+  .skill-desc { font-size: 11px; color: #999; margin-top: 4px; }
+  .skill-badge { display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: 10px;
+    margin-left: 8px; font-weight: bold; }
+  .skill-badge.loaded { background: #2d6a4f; color: #7bed9f; }
+  #skill-detail { display: none; }
+  #skill-detail .back-btn { color: #53cfcf; cursor: pointer; font-size: 12px; margin-bottom: 12px; }
+  #skill-detail .back-btn:hover { text-decoration: underline; }
+  #skill-detail-title { font-size: 16px; color: #53cfcf; margin-bottom: 8px; }
+  #skill-detail-body { font-size: 12px; color: #ccc; line-height: 1.6; white-space: pre-wrap;
+    background: #0f3460; padding: 12px; border-radius: 6px; border: 1px solid #333; }
+
+  /* ── Memory panel ───────────────────────────── */
+  .store-card { background: #16213e; border: 1px solid #333; border-radius: 8px;
+    padding: 12px 16px; margin-bottom: 10px; cursor: pointer; transition: all 0.3s; }
+  .store-card:hover { border-color: #e94560; }
+  .store-card.memory-flash { border-color: #e94560; box-shadow: 0 0 12px rgba(233,69,96,0.4);
+    animation: memFlash 0.8s; }
+  @keyframes memFlash { 0%,100% { box-shadow: none; } 50% { box-shadow: 0 0 20px rgba(233,69,96,0.6); } }
+  .store-name { font-size: 14px; font-weight: bold; color: #e94560; }
+  .store-desc { font-size: 11px; color: #999; margin-top: 4px; }
+  .store-docs { font-size: 10px; color: #666; margin-top: 4px; }
+  .doc-row { display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 12px; background: #16213e; border: 1px solid #333; border-radius: 4px;
+    margin-bottom: 4px; cursor: pointer; font-size: 12px; }
+  .doc-row:hover { border-color: #e94560; }
+  .version-badge { background: #3d1f56; color: #d4a5ff; font-size: 10px;
+    padding: 2px 6px; border-radius: 4px; }
+  #mem-detail { display: none; }
+  #mem-detail .back-btn { color: #e94560; cursor: pointer; font-size: 12px; margin-bottom: 8px; }
+  #mem-detail .back-btn:hover { text-decoration: underline; }
+  #mem-detail-title { font-size: 14px; color: #e94560; margin-bottom: 4px; }
+  #mem-detail-meta { font-size: 10px; color: #666; margin-bottom: 10px; }
+  #mem-detail-content { background: #0f3460; border: 1px solid #333; border-radius: 4px;
+    padding: 12px; font-size: 12px; color: #ccc; line-height: 1.6; white-space: pre-wrap;
+    max-height: 400px; overflow-y: auto; }
+
+  /* ── Dreams panel ───────────────────────────── */
+  .dream-section { margin-bottom: 20px; }
+  .dream-section h3 { font-size: 13px; color: #d4a5ff; margin-bottom: 8px; }
+  #dream-status { font-size: 12px; color: #888; padding: 8px 0; }
+  .dream-progress { color: #d4a5ff; font-style: italic; font-size: 12px; }
+  .insight-card { background: #16213e; border-left: 3px solid #d4a5ff; padding: 8px 12px;
+    margin-bottom: 6px; font-size: 12px; color: #ccc; border-radius: 0 4px 4px 0; }
+  .dream-stats { display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+  .dream-stat { background: #16213e; padding: 10px 14px; border-radius: 6px; text-align: center;
+    border: 1px solid #333; }
+  .dream-stat .num { font-size: 22px; font-weight: bold; color: #d4a5ff; }
+  .dream-stat .lbl { font-size: 10px; color: #888; margin-top: 2px; }
+  .trace-card { background: #16213e; border: 1px solid #333; border-radius: 4px;
+    padding: 8px 12px; margin-bottom: 6px; font-size: 11px; }
+  .trace-outcome { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 10px; }
+  .trace-outcome.success { background: #2d6a4f; color: #7bed9f; }
+  .trace-outcome.failure { background: #6a2d2d; color: #e4b7b7; }
+
+  /* ── Controls ───────────────────────────────── */
+  #controls { grid-column: 1 / -1; display: flex; align-items: center; gap: 10px;
+    padding: 10px 20px; background: #0f3460; border-top: 2px solid #333; }
+  .ctrl-btn { padding: 8px 20px; border: none; border-radius: 6px; cursor: pointer;
+    font-family: inherit; font-size: 13px; font-weight: bold; transition: all 0.2s; }
+  .ctrl-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-run { background: #7bed9f; color: #1a1a2e; }
+  .btn-run:hover:not(:disabled) { background: #2ed573; }
+  .btn-dream { background: #d4a5ff; color: #1a1a2e; }
+  .btn-dream:hover:not(:disabled) { background: #a29bfe; }
+  .btn-reset { background: #555; color: #e0e0e0; }
+  .btn-reset:hover:not(:disabled) { background: #777; }
+  #run-indicator { flex: 1; text-align: right; font-size: 12px; color: #888; }
+
+  /* ── Connection ─────────────────────────────── */
+  #conn { font-size: 10px; padding: 3px 8px; border-radius: 3px; }
+  .connected { background: #2d6a4f; color: #b7e4c7; }
+  .disconnected { background: #6a2d2d; color: #e4b7b7; }
+</style>
+</head>
+<body>
+
+<!-- ── Top bar ──────────────────────────────────── -->
+<div id="top-bar">
+  <h1>RoClaw — Skills, Memory & Dreams</h1>
+  <div class="info">
+    <span id="conn" class="disconnected">Disconnected</span>
+    <span id="backend-info">--</span>
+  </div>
+</div>
+
+<!-- ── Arena (left) ─────────────────────────────── -->
+<div id="arena-section">
+  <div id="arena-wrap">
+    <canvas id="arena" width="600" height="500"></canvas>
+  </div>
+  <div id="status-bar">
+    <div><span class="label">Pos:</span> <span class="val" id="s-pos">(-0.50, -1.00)</span></div>
+    <div><span class="label">Hdg:</span> <span class="val" id="s-hdg">90</span>&deg;</div>
+    <div><span class="label">Step:</span> <span class="val" id="s-step">0</span></div>
+    <div><span class="label">Action:</span> <span class="val" id="s-action">idle</span></div>
+  </div>
+  <div id="agent-log"></div>
+</div>
+
+<!-- ── Panel (right) ────────────────────────────── -->
+<div id="panel-section">
+  <div id="tab-bar">
+    <div class="tab active" data-tab="skills">Skills <span class="tab-dot" id="dot-skills" style="background:#a29bfe"></span></div>
+    <div class="tab" data-tab="memory">Memory <span class="tab-dot" id="dot-memory" style="background:#e94560"></span></div>
+    <div class="tab" data-tab="dreams">Dreams <span class="tab-dot" id="dot-dreams" style="background:#d4a5ff"></span></div>
+  </div>
+
+  <!-- Skills -->
+  <div id="panel-skills" class="tab-panel active">
+    <div id="skill-list"></div>
+    <div id="skill-detail">
+      <div class="back-btn" onclick="showSkillList()">&larr; Back to skills</div>
+      <div id="skill-detail-title"></div>
+      <div id="skill-detail-body"></div>
+    </div>
+  </div>
+
+  <!-- Memory -->
+  <div id="panel-memory" class="tab-panel">
+    <div id="mem-stores"></div>
+    <div id="mem-docs" style="display:none"></div>
+    <div id="mem-detail">
+      <div class="back-btn" onclick="showMemDocs()">&larr; Back to documents</div>
+      <div id="mem-detail-title"></div>
+      <div id="mem-detail-meta"></div>
+      <div id="mem-detail-content"></div>
+    </div>
+  </div>
+
+  <!-- Dreams -->
+  <div id="panel-dreams" class="tab-panel">
+    <div class="dream-section">
+      <h3>Dream Consolidation</h3>
+      <div id="dream-status">No dream has been run yet. Run a patrol first, then consolidate.</div>
+      <div id="dream-stats" style="display:none"></div>
+      <div id="dream-insights"></div>
+    </div>
+    <div class="dream-section">
+      <h3>Session Traces</h3>
+      <div id="trace-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Controls ─────────────────────────────────── -->
+<div id="controls">
+  <button class="ctrl-btn btn-run" id="btn-run" onclick="startRun()">Run Patrol</button>
+  <button class="ctrl-btn btn-dream" id="btn-dream" onclick="startDream()">Dream</button>
+  <button class="ctrl-btn btn-reset" id="btn-reset" onclick="resetDemo()">Reset</button>
+  <div id="run-indicator">Ready</div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// Scene
+// ═══════════════════════════════════════════════════════════════
+
+const OBJECTS = [
+  { id: 'server_room',       x:  0.0, y:  1.6, color: '#e74c3c', w: 0.28, h: 0.28, label: 'Server Room', checkpoint: true },
+  { id: 'emergency_exit',    x: -1.5, y:  1.5, color: '#e67e22', w: 0.24, h: 0.24, label: 'Emergency Exit', checkpoint: true },
+  { id: 'supply_closet',     x:  1.3, y: -0.5, color: '#9b59b6', w: 0.22, h: 0.22, label: 'Supply Closet', checkpoint: true },
+  { id: 'main_entrance',     x: -1.0, y: -1.2, color: '#3498db', w: 0.26, h: 0.26, label: 'Main Entrance', checkpoint: true },
+  { id: 'guard_carlos',      x:  0.5, y:  0.3, color: '#f5c542', w: 0.2, h: 0.2, label: 'Carlos', shape: 'circle' },
+  { id: 'fire_extinguisher', x: -0.8, y:  0.5, color: '#e94560', w: 0.12, h: 0.12, label: 'Fire Ext.', shape: 'circle' },
+];
+
+const ARENA_M = 4;
+const CANVAS_W = 600, CANVAS_H = 500;
+const SCALE = CANVAS_W / ARENA_M;
+
+// Robot state: target (from server) and display (smooth interpolation)
+let robotTarget = { x: -0.5, y: -1.0, heading: 90 };
+let robotDisplay = { x: -0.5, y: -1.0, heading: 90 };
+let step = 0;
+let lastAction = 'idle';
+const trail = [];
+const visited = new Map(); // id -> 'clear' | 'anomaly'
+let observePulse = 0;
+let activeSkills = new Set();
+let speechBubble = { text: '', alpha: 0 };
+let lastSpeechTimeout = null;
+
+const canvas = document.getElementById('arena');
+const ctx = canvas.getContext('2d');
+const API = window.location.origin;
+
+function toCanvas(x, y) {
+  return [ CANVAS_W / 2 + x * SCALE, CANVAS_H / 2 - y * SCALE ];
+}
+
+// Smooth angle interpolation
+function lerpAngle(a, b, t) {
+  let diff = b - a;
+  while (diff > 180) diff -= 360;
+  while (diff < -180) diff += 360;
+  return a + diff * t;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Drawing
+// ═══════════════════════════════════════════════════════════════
+
+function draw() {
+  // Smooth interpolation toward target
+  const spd = 0.15;
+  robotDisplay.x += (robotTarget.x - robotDisplay.x) * spd;
+  robotDisplay.y += (robotTarget.y - robotDisplay.y) * spd;
+  robotDisplay.heading = lerpAngle(robotDisplay.heading, robotTarget.heading, spd);
+
+  ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
+
+  // Grid
+  ctx.strokeStyle = '#1e3a5f'; ctx.lineWidth = 0.5;
+  for (let i = -2; i <= 2; i += 0.5) {
+    const [x1, y1] = toCanvas(i, -2); const [x2, y2] = toCanvas(i, 2);
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+    const [x3, y3] = toCanvas(-2, i); const [x4, y4] = toCanvas(2, i);
+    ctx.beginPath(); ctx.moveTo(x3, y3); ctx.lineTo(x4, y4); ctx.stroke();
+  }
+
+  // Arena border
+  ctx.strokeStyle = '#444'; ctx.lineWidth = 2;
+  const [bx, by] = toCanvas(-2, 2);
+  ctx.strokeRect(bx, by, ARENA_M * SCALE, ARENA_M * SCALE);
+
+  // Patrol trail
+  if (trail.length > 1) {
+    ctx.strokeStyle = 'rgba(83,207,207,0.35)'; ctx.lineWidth = 2;
+    ctx.setLineDash([5, 3]);
+    ctx.beginPath();
+    const [sx, sy] = toCanvas(trail[0].x, trail[0].y);
+    ctx.moveTo(sx, sy);
+    for (let i = 1; i < trail.length; i++) {
+      const [px, py] = toCanvas(trail[i].x, trail[i].y);
+      ctx.lineTo(px, py);
+    }
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  // Observe pulse (expanding ring)
+  if (observePulse > 0) {
+    const [rx, ry] = toCanvas(robotDisplay.x, robotDisplay.y);
+    const maxR = 3.5 * SCALE;
+    const r = maxR * (1 - observePulse * 0.3);
+    ctx.beginPath(); ctx.arc(rx, ry, r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(83,207,207,${observePulse * 0.06})`;
+    ctx.fill();
+    ctx.strokeStyle = `rgba(83,207,207,${observePulse * 0.25})`;
+    ctx.lineWidth = 1.5; ctx.stroke();
+    observePulse = Math.max(0, observePulse - 0.015);
+  }
+
+  // Objects
+  for (const obj of OBJECTS) {
+    const [cx, cy] = toCanvas(obj.x, obj.y);
+    const pw = obj.w * SCALE, ph = obj.h * SCALE;
+
+    // Checkpoint status glow
+    if (obj.checkpoint && visited.has(obj.id)) {
+      const status = visited.get(obj.id);
+      const glowColor = status === 'clear' ? 'rgba(123,237,159,0.3)' : 'rgba(233,69,96,0.3)';
+      ctx.fillStyle = glowColor;
+      ctx.beginPath(); ctx.arc(cx, cy, pw * 0.8, 0, Math.PI * 2); ctx.fill();
+    }
+
+    ctx.fillStyle = obj.color; ctx.globalAlpha = 0.8;
+    if (obj.shape === 'circle') {
+      ctx.beginPath(); ctx.arc(cx, cy, pw / 2, 0, Math.PI * 2); ctx.fill();
+    } else {
+      const r = 4;
+      ctx.beginPath();
+      ctx.moveTo(cx - pw/2 + r, cy - ph/2);
+      ctx.arcTo(cx + pw/2, cy - ph/2, cx + pw/2, cy + ph/2, r);
+      ctx.arcTo(cx + pw/2, cy + ph/2, cx - pw/2, cy + ph/2, r);
+      ctx.arcTo(cx - pw/2, cy + ph/2, cx - pw/2, cy - ph/2, r);
+      ctx.arcTo(cx - pw/2, cy - ph/2, cx + pw/2, cy - ph/2, r);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1.0;
+
+    // Visit status icon
+    if (visited.has(obj.id)) {
+      const status = visited.get(obj.id);
+      ctx.font = 'bold 14px sans-serif'; ctx.textAlign = 'center';
+      if (status === 'clear') {
+        ctx.fillStyle = '#7bed9f';
+        ctx.fillText('\u2713', cx + pw/2 + 10, cy - ph/2 + 6);
+      } else {
+        ctx.fillStyle = '#e94560';
+        ctx.fillText('!', cx + pw/2 + 10, cy - ph/2 + 6);
+      }
+    }
+
+    // Label
+    ctx.fillStyle = '#bbb'; ctx.font = '11px monospace'; ctx.textAlign = 'center';
+    ctx.fillText(obj.label, cx, cy + ph / 2 + 16);
+  }
+
+  // Robot heading cone (FOV)
+  const [rx2, ry2] = toCanvas(robotDisplay.x, robotDisplay.y);
+  const hdgRad = -(robotDisplay.heading * Math.PI / 180);
+  ctx.save(); ctx.translate(rx2, ry2); ctx.rotate(hdgRad);
+  ctx.beginPath(); ctx.moveTo(0, 0);
+  ctx.arc(0, 0, 0.6 * SCALE, -0.35, 0.35);
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(83,207,207,0.08)';
+  ctx.fill();
+  ctx.restore();
+
+  // Robot body
+  ctx.save(); ctx.translate(rx2, ry2); ctx.rotate(hdgRad);
+  const cw = 0.18 * SCALE, ch = 0.12 * SCALE;
+  // Shadow
+  ctx.fillStyle = 'rgba(0,0,0,0.3)';
+  ctx.fillRect(-cw/2 + 2, -ch/2 + 2, cw, ch);
+  // Chassis
+  ctx.fillStyle = '#2c3e88'; ctx.fillRect(-cw/2, -ch/2, cw, ch);
+  ctx.strokeStyle = '#5a7bd4'; ctx.lineWidth = 2; ctx.strokeRect(-cw/2, -ch/2, cw, ch);
+  // Heading arrow
+  ctx.fillStyle = '#e94560';
+  ctx.beginPath(); ctx.moveTo(cw/2 + 8, 0); ctx.lineTo(cw/2 - 1, -6); ctx.lineTo(cw/2 - 1, 6); ctx.closePath(); ctx.fill();
+  ctx.restore();
+
+  // Speech bubble
+  if (speechBubble.alpha > 0) {
+    const maxW = 260;
+    ctx.font = '11px monospace';
+    const txt = speechBubble.text.length > 60 ? speechBubble.text.slice(0, 57) + '...' : speechBubble.text;
+    const tw = Math.min(ctx.measureText(txt).width + 16, maxW);
+    const bx2 = rx2 - tw / 2;
+    const by2 = ry2 - ch - 20;
+    ctx.globalAlpha = speechBubble.alpha;
+    ctx.fillStyle = 'rgba(15,52,96,0.92)';
+    ctx.strokeStyle = '#53cfcf';
+    ctx.lineWidth = 1;
+    // Rounded rect
+    const rr = 6;
+    ctx.beginPath();
+    ctx.moveTo(bx2 + rr, by2); ctx.arcTo(bx2 + tw, by2, bx2 + tw, by2 + 20, rr);
+    ctx.arcTo(bx2 + tw, by2 + 20, bx2, by2 + 20, rr);
+    ctx.arcTo(bx2, by2 + 20, bx2, by2, rr);
+    ctx.arcTo(bx2, by2, bx2 + tw, by2, rr);
+    ctx.fill(); ctx.stroke();
+    // Pointer
+    ctx.beginPath(); ctx.moveTo(rx2 - 5, by2 + 20); ctx.lineTo(rx2, by2 + 28); ctx.lineTo(rx2 + 5, by2 + 20); ctx.fill();
+    // Text
+    ctx.fillStyle = '#53cfcf'; ctx.textAlign = 'center';
+    ctx.fillText(txt, bx2 + tw / 2, by2 + 14);
+    ctx.globalAlpha = 1.0;
+    speechBubble.alpha = Math.max(0, speechBubble.alpha - 0.003);
+  }
+
+  requestAnimationFrame(draw);
+}
+
+function showSpeechBubble(text) {
+  speechBubble.text = text;
+  speechBubble.alpha = 1.0;
+  if (lastSpeechTimeout) clearTimeout(lastSpeechTimeout);
+  lastSpeechTimeout = setTimeout(() => { speechBubble.alpha = 0; }, 5000);
+}
+
+function updateStatus() {
+  document.getElementById('s-pos').textContent = `(${robotTarget.x.toFixed(2)}, ${robotTarget.y.toFixed(2)})`;
+  document.getElementById('s-hdg').textContent = Math.round(robotTarget.heading);
+  document.getElementById('s-step').textContent = step;
+  document.getElementById('s-action').textContent = lastAction;
+}
+
+function markCheckpoint(speakText) {
+  const text = speakText.toLowerCase();
+  for (const obj of OBJECTS) {
+    if (!obj.checkpoint) continue;
+    const lbl = obj.label.toLowerCase();
+    if (text.includes(lbl) || text.includes(obj.id.replace(/_/g, ' '))) {
+      const status = text.includes('anomal') || text.includes('issue') || text.includes('warm') || text.includes('open') ? 'anomaly' : 'clear';
+      visited.set(obj.id, status);
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Agent Log
+// ═══════════════════════════════════════════════════════════════
+
+function esc(s) { const d = document.createElement('span'); d.textContent = s; return d.innerHTML; }
+
+function addLog(type, text) {
+  const el = document.getElementById('agent-log');
+  const div = document.createElement('div');
+  div.className = `log-entry log-${type}`;
+  const t = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  div.innerHTML = `<span class="log-time">${t}</span><span class="log-type">[${type}]</span> ${esc(text)}`;
+  el.appendChild(div);
+  el.scrollTop = el.scrollHeight;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Tabs
+// ═══════════════════════════════════════════════════════════════
+
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+    // Clear notification dot
+    const dot = tab.querySelector('.tab-dot');
+    if (dot) dot.classList.remove('on');
+  });
+});
+
+function notifyTab(tabName) {
+  const tab = document.querySelector(`.tab[data-tab="${tabName}"]`);
+  if (tab && !tab.classList.contains('active')) {
+    const dot = tab.querySelector('.tab-dot');
+    if (dot) dot.classList.add('on');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Skills Panel
+// ═══════════════════════════════════════════════════════════════
+
+async function loadSkillsList() {
+  try {
+    const res = await fetch(API + '/api/skills');
+    const skills = await res.json();
+    const el = document.getElementById('skill-list');
+    el.innerHTML = '';
+    for (const s of skills) {
+      const card = document.createElement('div');
+      card.className = 'skill-card' + (activeSkills.has(s.name) ? ' skill-active' : '');
+      card.dataset.name = s.name;
+      card.innerHTML = `<div class="skill-name">${esc(s.name)}<span class="skill-badge${activeSkills.has(s.name) ? ' loaded' : ''}" id="badge-${s.name}">${activeSkills.has(s.name) ? 'ACTIVE' : ''}</span></div><div class="skill-desc">${esc(s.description)}</div>`;
+      card.onclick = () => loadSkillDetail(s.name);
+      el.appendChild(card);
+    }
+    document.getElementById('skill-list').style.display = '';
+    document.getElementById('skill-detail').style.display = 'none';
+  } catch (e) { console.error('Failed to load skills:', e); }
+}
+
+async function loadSkillDetail(name) {
+  try {
+    const res = await fetch(API + '/api/skills/' + encodeURIComponent(name));
+    const skill = await res.json();
+    document.getElementById('skill-detail-title').textContent = skill.name;
+    document.getElementById('skill-detail-body').textContent = skill.instructions;
+    document.getElementById('skill-list').style.display = 'none';
+    document.getElementById('skill-detail').style.display = '';
+  } catch (e) { console.error('Failed to load skill:', e); }
+}
+
+function showSkillList() {
+  document.getElementById('skill-list').style.display = '';
+  document.getElementById('skill-detail').style.display = 'none';
+}
+
+function highlightSkill(name) {
+  activeSkills.add(name);
+  const card = document.querySelector(`.skill-card[data-name="${name}"]`);
+  if (card) {
+    card.classList.add('skill-active');
+    const badge = card.querySelector('.skill-badge');
+    if (badge) { badge.textContent = 'ACTIVE'; badge.classList.add('loaded'); }
+  }
+  notifyTab('skills');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Memory Panel
+// ═══════════════════════════════════════════════════════════════
+
+let currentStoreName = null;
+
+async function loadMemoryStores() {
+  try {
+    const res = await fetch(API + '/api/memory');
+    const stores = await res.json();
+    const el = document.getElementById('mem-stores');
+    el.innerHTML = '';
+    for (const s of stores) {
+      const card = document.createElement('div');
+      card.className = 'store-card';
+      card.dataset.name = s.name;
+      card.innerHTML = `<div class="store-name">${esc(s.name)}</div><div class="store-desc">${esc(s.description)}</div><div class="store-docs">${s.documents} document(s) | ${s.access}</div>`;
+      card.onclick = () => loadStore(s.name);
+      el.appendChild(card);
+    }
+    document.getElementById('mem-stores').style.display = '';
+    document.getElementById('mem-docs').style.display = 'none';
+    document.getElementById('mem-detail').style.display = 'none';
+  } catch (e) { console.error('Failed to load memory:', e); }
+}
+
+async function loadStore(name) {
+  currentStoreName = name;
+  try {
+    const res = await fetch(API + '/api/memory/' + encodeURIComponent(name));
+    const data = await res.json();
+    const el = document.getElementById('mem-docs');
+    el.innerHTML = `<div class="back-btn" style="color:#e94560;cursor:pointer;font-size:12px;margin-bottom:8px" onclick="loadMemoryStores()">&larr; Back to stores</div><h3 style="color:#e94560;font-size:14px;margin-bottom:10px">${esc(name)}</h3>`;
+    if (data.documents.length === 0) {
+      el.innerHTML += '<div style="color:#666;font-size:12px">No documents yet</div>';
+    }
+    for (const doc of data.documents) {
+      const row = document.createElement('div');
+      row.className = 'doc-row';
+      row.innerHTML = `<span>${esc(doc.path)}</span><span style="color:#666;font-size:10px">${doc.sizeBytes}B</span>`;
+      row.onclick = () => loadDoc(name, doc.path);
+      el.appendChild(row);
+    }
+    document.getElementById('mem-stores').style.display = 'none';
+    document.getElementById('mem-docs').style.display = '';
+    document.getElementById('mem-detail').style.display = 'none';
+  } catch (e) { console.error('Failed to load store:', e); }
+}
+
+async function loadDoc(store, docPath) {
+  try {
+    const res = await fetch(API + '/api/memory/' + encodeURIComponent(store) + '/' + encodeURIComponent(docPath));
+    const data = await res.json();
+    document.getElementById('mem-detail-title').textContent = `${store} / ${docPath}`;
+    document.getElementById('mem-detail-meta').textContent = `Version: ${data.version} | SHA256: ${data.sha256.slice(0, 16)}...`;
+    document.getElementById('mem-detail-content').textContent = data.content;
+    document.getElementById('mem-docs').style.display = 'none';
+    document.getElementById('mem-detail').style.display = '';
+  } catch (e) { console.error('Failed to load doc:', e); }
+}
+
+function showMemDocs() {
+  if (currentStoreName) loadStore(currentStoreName);
+  else loadMemoryStores();
+}
+
+function flashStore(storeName) {
+  const card = document.querySelector(`.store-card[data-name="${storeName}"]`);
+  if (card) {
+    card.classList.add('memory-flash');
+    setTimeout(() => card.classList.remove('memory-flash'), 1500);
+  }
+  notifyTab('memory');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Dreams Panel
+// ═══════════════════════════════════════════════════════════════
+
+async function loadTraces() {
+  try {
+    const res = await fetch(API + '/api/traces');
+    const traces = await res.json();
+    const el = document.getElementById('trace-list');
+    el.innerHTML = '';
+    if (traces.length === 0) {
+      el.innerHTML = '<div style="color:#666;font-size:12px">No session traces yet. Run a patrol first.</div>';
+      return;
+    }
+    for (const t of traces) {
+      const card = document.createElement('div');
+      card.className = 'trace-card';
+      const ts = new Date(t.timestamp).toLocaleString();
+      card.innerHTML = `<div><span class="trace-outcome ${t.outcome}">${t.outcome}</span> <span style="color:#888">${ts}</span></div><div style="margin-top:4px;color:#ccc">${t.turns} turns | ${(t.durationMs/1000).toFixed(1)}s | Skills: ${t.skillsLoaded.join(', ')||'none'} | Mem: ${t.memoryReads}R/${t.memoryWrites}W</div>`;
+      el.appendChild(card);
+    }
+  } catch (e) { console.error('Failed to load traces:', e); }
+}
+
+function showDreamProgress(stage, detail) {
+  document.getElementById('dream-status').innerHTML = `<div class="dream-progress">${esc(stage)}: ${esc(detail)}</div>`;
+}
+
+function showDreamResult(result) {
+  const statsEl = document.getElementById('dream-stats');
+  statsEl.style.display = 'flex';
+  statsEl.innerHTML = `
+    <div class="dream-stat"><div class="num">${result.transcriptsProcessed}</div><div class="lbl">Transcripts</div></div>
+    <div class="dream-stat"><div class="num">${result.memoriesRead}</div><div class="lbl">Memories Read</div></div>
+    <div class="dream-stat"><div class="num">${result.memoriesWritten}</div><div class="lbl">Consolidated</div></div>
+    <div class="dream-stat"><div class="num">${(result.durationMs/1000).toFixed(1)}s</div><div class="lbl">Duration</div></div>`;
+  document.getElementById('dream-status').innerHTML = `<div style="color:#7bed9f;font-weight:bold">Dream completed successfully</div>`;
+  const insEl = document.getElementById('dream-insights');
+  insEl.innerHTML = '';
+  if (result.insights && result.insights.length > 0) {
+    insEl.innerHTML = '<h3 style="color:#d4a5ff;font-size:13px;margin:12px 0 8px">Insights Discovered</h3>';
+    for (const insight of result.insights) {
+      const card = document.createElement('div');
+      card.className = 'insight-card';
+      card.textContent = insight;
+      insEl.appendChild(card);
+    }
+  }
+  loadMemoryStores();
+  loadTraces();
+  notifyTab('dreams');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Controls
+// ═══════════════════════════════════════════════════════════════
+
+async function startRun() {
+  const btn = document.getElementById('btn-run');
+  btn.disabled = true; btn.textContent = 'Running...';
+  document.getElementById('btn-dream').disabled = true;
+  document.getElementById('btn-reset').disabled = true;
+  trail.length = 0;
+  visited.clear();
+  activeSkills.clear();
+  speechBubble.alpha = 0;
+  loadSkillsList();
+  addLog('info', 'Starting patrol run...');
+  try {
+    const res = await fetch(API + '/api/run', { method: 'POST', headers: {'Content-Type':'application/json'}, body: '{}' });
+    const data = await res.json();
+    if (data.error) { addLog('info', 'Error: ' + data.error); btn.disabled = false; btn.textContent = 'Run Patrol'; return; }
+    document.getElementById('run-indicator').textContent = `Run #${data.runNumber}`;
+  } catch (e) { addLog('info', 'Failed: ' + e.message); btn.disabled = false; btn.textContent = 'Run Patrol'; }
+}
+
+async function startDream() {
+  const btn = document.getElementById('btn-dream');
+  btn.disabled = true; btn.textContent = 'Dreaming...';
+  document.getElementById('btn-run').disabled = true;
+  document.getElementById('btn-reset').disabled = true;
+  addLog('dream', 'Starting dream consolidation...');
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelector('.tab[data-tab="dreams"]').classList.add('active');
+  document.getElementById('panel-dreams').classList.add('active');
+  try {
+    const res = await fetch(API + '/api/dream', { method: 'POST' });
+    const data = await res.json();
+    if (data.error) { addLog('dream', 'Error: ' + data.error); }
+  } catch (e) { addLog('dream', 'Failed: ' + e.message); }
+  btn.disabled = false; btn.textContent = 'Dream';
+  document.getElementById('btn-run').disabled = false;
+  document.getElementById('btn-reset').disabled = false;
+}
+
+async function resetDemo() {
+  if (!confirm('Reset all memory, traces, and patrol history?')) return;
+  try {
+    await fetch(API + '/api/reset', { method: 'POST' });
+    trail.length = 0;
+    visited.clear();
+    activeSkills.clear();
+    speechBubble.alpha = 0;
+    robotTarget = { x: -0.5, y: -1.0, heading: 90 };
+    robotDisplay = { x: -0.5, y: -1.0, heading: 90 };
+    document.getElementById('agent-log').innerHTML = '';
+    document.getElementById('dream-stats').style.display = 'none';
+    document.getElementById('dream-insights').innerHTML = '';
+    document.getElementById('dream-status').textContent = 'No dream has been run yet.';
+    document.getElementById('run-indicator').textContent = 'Ready (Reset)';
+    loadSkillsList();
+    loadMemoryStores();
+    loadTraces();
+    addLog('info', 'Demo reset complete');
+  } catch (e) { addLog('info', 'Reset failed: ' + e.message); }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// WebSocket
+// ═══════════════════════════════════════════════════════════════
+
+const WS_URL = new URLSearchParams(window.location.search).get('ws') || 'ws://localhost:9091';
+let ws = null;
+
+function connect() {
+  ws = new WebSocket(WS_URL);
+  const connEl = document.getElementById('conn');
+
+  ws.onopen = () => {
+    connEl.className = 'connected'; connEl.textContent = 'Connected';
+    addLog('info', 'Connected to agent');
+    fetch(API + '/api/status').then(r => r.json()).then(s => {
+      document.getElementById('backend-info').textContent = `${s.backend} (${s.model})`;
+    }).catch(() => {});
+  };
+
+  ws.onclose = () => {
+    connEl.className = 'disconnected'; connEl.textContent = 'Disconnected';
+    setTimeout(connect, 2000);
+  };
+
+  ws.onerror = () => ws.close();
+
+  ws.onmessage = (evt) => {
+    try {
+      const msg = JSON.parse(evt.data);
+
+      if (msg.type === 'pose') {
+        robotTarget.x = msg.x; robotTarget.y = msg.y; robotTarget.heading = msg.heading;
+        // Only add to trail if moved enough
+        const last = trail[trail.length - 1];
+        if (!last || Math.hypot(msg.x - last.x, msg.y - last.y) > 0.05) {
+          trail.push({ x: msg.x, y: msg.y });
+        }
+        updateStatus();
+      } else if (msg.type === 'move') {
+        step = msg.step || step;
+        lastAction = `move ${msg.distance_cm}cm`;
+        addLog('nav', `move ${msg.distance_cm}cm`);
+        updateStatus();
+      } else if (msg.type === 'rotate') {
+        step = msg.step || step;
+        lastAction = `rotate ${msg.direction} ${msg.degrees.toFixed(0)}\u00b0`;
+        addLog('nav', `turn ${msg.direction} ${msg.degrees.toFixed(0)}\u00b0`);
+        updateStatus();
+      } else if (msg.type === 'speak') {
+        step = msg.step || step;
+        lastAction = 'speak';
+        addLog('speak', `Robot: "${msg.text}"`);
+        showSpeechBubble(msg.text);
+        markCheckpoint(msg.text);
+        updateStatus();
+      } else if (msg.type === 'listen') {
+        step = msg.step || step;
+        lastAction = 'listen';
+        addLog('listen', `Person: "${msg.text}"`);
+        updateStatus();
+      } else if (msg.type === 'observe') {
+        step = msg.step || step;
+        lastAction = `scan (${msg.landmarks})`;
+        addLog('tool', `observe -> ${msg.landmarks} landmarks`);
+        observePulse = 1.0;
+        updateStatus();
+      } else if (msg.type === 'tool_call') {
+        step = msg.step || step;
+        if (!['move_forward','rotate_left','rotate_right','speak','listen','observe'].includes(msg.name)) {
+          addLog('tool', `${msg.name}(${JSON.stringify(msg.args).slice(0,80)})`);
+        }
+        updateStatus();
+      } else if (msg.type === 'halt') {
+        addLog('done', `DONE: ${msg.status}`);
+        lastAction = 'halted'; updateStatus();
+      } else if (msg.type === 'skill_loaded') {
+        highlightSkill(msg.name);
+        addLog('skill', `Skill loaded: ${msg.name}`);
+      } else if (msg.type === 'memory_read') {
+        flashStore(msg.store);
+        addLog('memory', `Memory read: ${msg.store}/${msg.path}`);
+      } else if (msg.type === 'memory_write') {
+        flashStore(msg.store);
+        addLog('memory', `Memory write: ${msg.store}/${msg.path}`);
+        loadMemoryStores();
+      } else if (msg.type === 'dream_progress') {
+        showDreamProgress(msg.stage, msg.detail);
+        addLog('dream', `${msg.stage}: ${msg.detail}`);
+      } else if (msg.type === 'dream_complete') {
+        showDreamResult(msg.result);
+        addLog('dream', `Dream complete: ${msg.result.insights.length} insight(s)`);
+      } else if (msg.type === 'run_started') {
+        addLog('info', 'Patrol started');
+      } else if (msg.type === 'run_complete') {
+        const btn = document.getElementById('btn-run');
+        btn.disabled = false; btn.textContent = 'Run Patrol';
+        document.getElementById('btn-dream').disabled = false;
+        document.getElementById('btn-reset').disabled = false;
+        document.getElementById('run-indicator').textContent = `${msg.outcome} | ${msg.turns} turns | ${(msg.durationMs/1000).toFixed(1)}s`;
+        addLog('done', `Patrol complete: ${msg.outcome}, ${msg.turns} turns, ${(msg.durationMs/1000).toFixed(1)}s`);
+        loadTraces();
+        loadMemoryStores();
+      }
+    } catch { /* ignore */ }
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Init
+// ═══════════════════════════════════════════════════════════════
+
+connect();
+requestAnimationFrame(draw);
+loadSkillsList();
+loadMemoryStores();
+loadTraces();
+</script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+{
+  "name": "preferences",
+  "description": "Stores information about facility staff: names, roles, schedules, and interaction history.",
+  "instructions": "Check this store before interacting with staff to recall known facts. Write new observations here (e.g., 'Carlos works the night shift').",
+  "access": "read_write",
+  "created": "2026-05-12T00:00:00Z",
+  "maxSizeBytes": 102400
+}

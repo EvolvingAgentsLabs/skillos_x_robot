@@ -1,0 +1,29 @@
+{
+  "name": "skillos_x_robot",
+  "version": "0.1.0",
+  "description": "Skill-driven robot agent — hardware abstracted, AI-powered via function calling",
+  "main": "dist/main.js",
+  "scripts": {
+    "build": "tsc",
+    "type-check": "tsc --noEmit",
+    "sim:2d": "tsx src/main.ts",
+    "sim:2d:stub": "tsx src/main.ts --stub",
+    "demo": "tsx src/main.ts --demo --backend gemini",
+    "demo:gemma4": "tsx src/main.ts --demo --backend gemma4",
+    "dream": "tsx src/dream_cli.ts",
+    "dream:50": "tsx src/dream_cli.ts --max-transcripts 50"
+  },
+  "keywords": ["robot", "skills", "gemma4", "function-calling", "hal"],
+  "author": "EvolvingAgentsLabs",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.4",
+    "@types/ws": "^8.5.14",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "name": "consolidated",
+  "description": "Dream-consolidated memories. Deduplicated, reorganized, and enriched from session transcripts.",
+  "instructions": "This store contains consolidated knowledge from past sessions. Check here for known facts about people, places, and preferences.",
+  "access": "read_write",
+  "created": "2026-05-25T23:00:36.903Z",
+  "maxSizeBytes": 102400
+}
