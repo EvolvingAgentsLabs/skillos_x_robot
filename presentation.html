@@ -1609,9 +1609,227 @@ POST <span class="string">generativelanguage.googleapis.com
 </div>
 
 <!-- ══════════════════════════════════════════════════════ -->
-<!-- SLIDE 29: HISTORA -->
+<!-- SLIDE 29: SPECIALIZATION AT SCALE + SHARED MEMORY -->
 <!-- ══════════════════════════════════════════════════════ -->
-<div class="slide slide-section" data-slide="29">
+<div class="slide" data-slide="29">
+  <h2>Especialización a escala: <span class="memory-c">memoria compartida</span></h2>
+  <p class="dim" style="margin-bottom:20px;">¿Qué pasa cuando no es un agente sino miles?</p>
+  <div class="grid-2" style="margin-top:12px;">
+    <div>
+      <div class="card card-skill" style="margin-bottom:16px;">
+        <h3 class="skill-c">Especialización emergente</h3>
+        <p style="font-size:1.05rem; margin-top:8px;">
+          Cada agente acumula experiencia en su dominio. Después de N sesiones, su memoria consolidada lo convierte en un <strong>especialista</strong>.
+        </p>
+        <p class="dim" style="font-size:0.95rem; margin-top:8px;">
+          Un agente de patrullaje que hizo 100 rondas sabe más del edificio que cualquier prompt estático.
+        </p>
+      </div>
+      <div class="card card-memory">
+        <h3 class="memory-c">Memoria compartida entre agentes</h3>
+        <p style="font-size:1.05rem; margin-top:8px;">
+          El conocimiento de un especialista puede ser <strong>leído por otros agentes</strong>. Memory stores compartidos. Dreams cruzados.
+        </p>
+        <p class="dim" style="font-size:0.95rem; margin-top:8px;">
+          El agente de turno noche lee las consolidaciones del de turno día. Un nuevo agente hereda la experiencia del que reemplaza.
+        </p>
+      </div>
+    </div>
+    <div style="display:flex; flex-direction:column; justify-content:center;">
+      <div class="diagram" style="flex-direction:column; gap:16px;">
+        <div style="display:flex; gap:16px; justify-content:center;">
+          <div class="box box-skill" style="min-width:140px; font-size:0.9rem;">
+            <div class="skill-c" style="font-weight:700;">Agente A</div>
+            <div class="dim">especialista seguridad</div>
+          </div>
+          <div class="box box-skill" style="min-width:140px; font-size:0.9rem;">
+            <div class="skill-c" style="font-weight:700;">Agente B</div>
+            <div class="dim">especialista logística</div>
+          </div>
+          <div class="box box-skill" style="min-width:140px; font-size:0.9rem;">
+            <div class="skill-c" style="font-weight:700;">Agente C</div>
+            <div class="dim">especialista salud</div>
+          </div>
+        </div>
+        <div class="arrow" style="font-size:1.2rem;">&#8595; escriben &#8593; leen</div>
+        <div class="box box-memory" style="min-width:100%; text-align:center;">
+          <div class="memory-c" style="font-weight:700; font-size:1.1rem;">Memoria compartida</div>
+          <div class="dim" style="font-size:0.85rem; margin-top:4px;">Consolidated knowledge &mdash; versionado, estructurado, accesible</div>
+        </div>
+        <div class="arrow" style="font-size:1.2rem;">&#8595;</div>
+        <div class="box box-dream" style="min-width:100%; text-align:center;">
+          <div class="dream-c" style="font-weight:700;">Dream Engine cruzado</div>
+          <div class="dim" style="font-size:0.85rem; margin-top:4px;">Consolida experiencia de múltiples agentes en un solo knowledge base</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- SLIDE 30: INFRASTRUCTURE - THE NEXT GITHUB / K8S -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="slide" data-slide="30">
+  <h2>Infraestructura: <span class="yellow-c">¿cuál es el próximo GitHub para agentes?</span></h2>
+  <p class="dim" style="margin-bottom:24px;">Los agentes necesitan su propia infraestructura. ¿Qué existe hoy y qué falta?</p>
+  <div class="grid-2" style="margin-top:8px;">
+    <div>
+      <div class="card" style="margin-bottom:16px; border-left:4px solid var(--accent2);">
+        <h3 class="yellow-c">¿Kubernetes alcanza?</h3>
+        <p style="font-size:1.05rem; margin-top:8px;">
+          K8s orquesta <strong>containers</strong> &mdash; pero los agentes no son containers. Tienen estado, memoria, skills, relaciones con otros agentes.
+        </p>
+        <p style="font-size:1.05rem; margin-top:12px;">
+          ¿Necesitamos un <strong>"Kubernetes para agentes"</strong> que maneje lifecycle, memory persistence, skill registries, y comunicación inter-agente?
+        </p>
+      </div>
+      <div class="card" style="border-left:4px solid var(--dream-color);">
+        <h3 class="dream-c">¿Cuál es el Git para agentes?</h3>
+        <p style="font-size:1.05rem; margin-top:8px;">
+          Los skills son archivos Markdown. Las memorias son documentos versionados. Los dreams son consolidaciones.
+        </p>
+        <p style="font-size:1.05rem; margin-top:12px;">
+          ¿Un registry de skills como npm? ¿Un repositorio de memorias compartidas? ¿Un marketplace de agentes especializados?
+        </p>
+      </div>
+    </div>
+    <div style="display:flex; flex-direction:column; justify-content:center; gap:16px;">
+      <div class="card" style="text-align:center; padding:24px;">
+        <p class="dim" style="font-size:0.85rem; text-transform:uppercase;">Código</p>
+        <p class="bright" style="font-size:1.3rem; font-weight:700;">GitHub</p>
+        <p class="dim" style="font-size:0.9rem; margin-top:4px;">Resuelto</p>
+      </div>
+      <div class="card" style="text-align:center; padding:24px;">
+        <p class="dim" style="font-size:0.85rem; text-transform:uppercase;">Containers</p>
+        <p class="bright" style="font-size:1.3rem; font-weight:700;">Kubernetes</p>
+        <p class="dim" style="font-size:0.9rem; margin-top:4px;">Resuelto</p>
+      </div>
+      <div class="card" style="text-align:center; padding:24px; border:2px solid var(--accent2);">
+        <p class="dim" style="font-size:0.85rem; text-transform:uppercase;">Agentes</p>
+        <p class="yellow-c" style="font-size:1.3rem; font-weight:700;">¿ ? </p>
+        <p class="accent-c" style="font-size:0.9rem; margin-top:4px; font-weight:600;">Por resolver</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- SLIDE 31: AGENTS CONTROLLING AGENTS -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="slide" data-slide="31">
+  <h2>Agentes que <span class="accent-c">controlan</span> y <span class="green-c">mejoran</span> otros agentes</h2>
+  <p class="dim" style="margin-bottom:24px;">Meta-agentes: supervisión, evaluación y evolución autónoma.</p>
+  <div class="grid-2" style="margin-top:12px;">
+    <div>
+      <div style="display:flex; align-items:flex-start; gap:20px; padding:16px 0; border-bottom:1px solid rgba(255,255,255,0.06);">
+        <span class="big-number accent-c" style="font-size:2rem; min-width:40px;">1</span>
+        <div>
+          <h3 class="accent-c">Agentes supervisores</h3>
+          <p style="font-size:1.05rem;" class="dim">Un meta-agente que monitorea la performance de otros. Detecta cuando un agente falla, se degrada, o toma decisiones subóptimas.</p>
+        </div>
+      </div>
+      <div style="display:flex; align-items:flex-start; gap:20px; padding:16px 0; border-bottom:1px solid rgba(255,255,255,0.06);">
+        <span class="big-number green-c" style="font-size:2rem; min-width:40px;">2</span>
+        <div>
+          <h3 class="green-c">Agentes que evolucionan skills</h3>
+          <p style="font-size:1.05rem;" class="dim">Un agente analiza los Dreams de otro y genera skills mejorados. Evolución dirigida por experiencia acumulada.</p>
+        </div>
+      </div>
+      <div style="display:flex; align-items:flex-start; gap:20px; padding:16px 0; border-bottom:1px solid rgba(255,255,255,0.06);">
+        <span class="big-number dream-c" style="font-size:2rem; min-width:40px;">3</span>
+        <div>
+          <h3 class="dream-c">Agentes que consolidan para otros</h3>
+          <p style="font-size:1.05rem;" class="dim">Un Dream Engine compartido que procesa la experiencia colectiva de todo el swarm.</p>
+        </div>
+      </div>
+      <div style="display:flex; align-items:flex-start; gap:20px; padding:16px 0;">
+        <span class="big-number yellow-c" style="font-size:2rem; min-width:40px;">4</span>
+        <div>
+          <h3 class="yellow-c">Jerarquías de control</h3>
+          <p style="font-size:1.05rem;" class="dim">Agentes operativos → agentes supervisores → agentes estratégicos. Cada nivel con su propia memoria y sus propios dreams.</p>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex; align-items:center; justify-content:center;">
+      <div class="diagram" style="flex-direction:column; gap:16px;">
+        <div class="box" style="min-width:280px; border-color:var(--accent2); text-align:center;">
+          <div class="yellow-c" style="font-weight:700;">Agente Estratégico</div>
+          <div class="dim" style="font-size:0.85rem;">Define objetivos, evalúa resultados</div>
+        </div>
+        <div class="arrow">&#8595;</div>
+        <div style="display:flex; gap:12px;">
+          <div class="box" style="min-width:130px; border-color:var(--accent); text-align:center; font-size:0.9rem;">
+            <div class="accent-c" style="font-weight:700;">Supervisor A</div>
+            <div class="dim" style="font-size:0.8rem;">Monitorea + mejora</div>
+          </div>
+          <div class="box" style="min-width:130px; border-color:var(--accent); text-align:center; font-size:0.9rem;">
+            <div class="accent-c" style="font-weight:700;">Supervisor B</div>
+            <div class="dim" style="font-size:0.8rem;">Monitorea + mejora</div>
+          </div>
+        </div>
+        <div class="arrow">&#8595;</div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center;">
+          <div class="box box-skill" style="min-width:80px; padding:12px; font-size:0.8rem; text-align:center;">Op 1</div>
+          <div class="box box-skill" style="min-width:80px; padding:12px; font-size:0.8rem; text-align:center;">Op 2</div>
+          <div class="box box-skill" style="min-width:80px; padding:12px; font-size:0.8rem; text-align:center;">Op 3</div>
+          <div class="box box-skill" style="min-width:80px; padding:12px; font-size:0.8rem; text-align:center;">Op 4</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- SLIDE 32: SECURITY + SCALABILITY - OPEN QUESTIONS -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="slide" data-slide="32">
+  <h2>Las dos grandes preguntas abiertas</h2>
+  <p class="dim" style="margin-bottom:24px;">Temas para la conversación &mdash; no tenemos todas las respuestas.</p>
+  <div class="grid-2" style="margin-top:12px;">
+    <div class="card" style="border-top:4px solid var(--accent);">
+      <h3 class="accent-c" style="font-size:1.4rem;">Seguridad</h3>
+      <ul style="margin-top:16px;">
+        <li style="padding:8px 0; font-size:1.05rem;">
+          <strong>Memory poisoning</strong> &mdash; ¿qué pasa si un agente escribe información falsa en la memoria compartida?
+        </li>
+        <li style="padding:8px 0; font-size:1.05rem;">
+          <strong>Skill injection</strong> &mdash; ¿cómo validar que un skill de terceros no es malicioso?
+        </li>
+        <li style="padding:8px 0; font-size:1.05rem;">
+          <strong>Dream manipulation</strong> &mdash; ¿se puede manipular la consolidación para cambiar el comportamiento del agente?
+        </li>
+        <li style="padding:8px 0; font-size:1.05rem;">
+          <strong>Autonomía vs control</strong> &mdash; ¿cuánta autonomía le das a un agente que controla otros agentes?
+        </li>
+      </ul>
+    </div>
+    <div class="card" style="border-top:4px solid var(--accent2);">
+      <h3 class="yellow-c" style="font-size:1.4rem;">Escalabilidad</h3>
+      <ul style="margin-top:16px;">
+        <li style="padding:8px 0; font-size:1.05rem;">
+          <strong>Memory at scale</strong> &mdash; ¿qué pasa cuando un agente tiene 10.000 documentos consolidados?
+        </li>
+        <li style="padding:8px 0; font-size:1.05rem;">
+          <strong>Dream compute</strong> &mdash; consolidar 1000 sesiones de 50 agentes &mdash; ¿cuánto LLM compute necesitás?
+        </li>
+        <li style="padding:8px 0; font-size:1.05rem;">
+          <strong>Skill discovery</strong> &mdash; con 10.000 skills disponibles, ¿cómo elige el agente sin explotar el contexto?
+        </li>
+        <li style="padding:8px 0; font-size:1.05rem;">
+          <strong>Coordination overhead</strong> &mdash; ¿cómo escala la comunicación inter-agente cuando hay cientos?
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div class="highlight-box" style="margin-top:24px; border-color: var(--text-dim);">
+    Estos son los problemas que definen la próxima generación de infraestructura de agentes.
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- SLIDE 33: HISTORA -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="slide slide-section" data-slide="33">
   <div>
     <p class="dim" style="font-size:1rem; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:24px;">Histora</p>
     <h1 style="font-size:2.4rem; background:none; -webkit-text-fill-color:var(--text-bright);">Muchas de las tecnologías presentadas<br>en esta charla son parte del próximo<br><span style="background: linear-gradient(135deg, var(--skill-color), var(--memory-color), var(--dream-color)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">stack tecnológico de Histora</span>.</h1>
@@ -1619,9 +1837,9 @@ POST <span class="string">generativelanguage.googleapis.com
 </div>
 
 <!-- ══════════════════════════════════════════════════════ -->
-<!-- SLIDE 30: CLOSING -->
+<!-- SLIDE 34: CLOSING -->
 <!-- ══════════════════════════════════════════════════════ -->
-<div class="slide slide-title" data-slide="30">
+<div class="slide slide-title" data-slide="34">
   <div>
     <h1 style="font-size:3rem;">¿Preguntas?</h1>
     <p class="subtitle" style="max-width:700px; margin:24px auto 0;">
@@ -1649,9 +1867,9 @@ POST <span class="string">generativelanguage.googleapis.com
 
 <!-- ── Navigation bar ──────────────────────────────────── -->
 <div class="nav-bar">
-  <span class="slide-num" id="slideNum">1 / 30</span>
+  <span class="slide-num" id="slideNum">1 / 34</span>
   <div class="progress">
-    <div class="progress-fill" id="progressFill" style="width:3.3%"></div>
+    <div class="progress-fill" id="progressFill" style="width:2.9%"></div>
   </div>
   <span class="slide-num dim" style="font-size:0.8rem;">&#8592; &#8594; o click para navegar</span>
 </div>
