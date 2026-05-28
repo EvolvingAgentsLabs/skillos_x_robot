@@ -1226,9 +1226,160 @@ Staff: Greeted Carlos..."</span></div>
 </div>
 
 <!-- ══════════════════════════════════════════════════════ -->
-<!-- SLIDE 19: OUR GEMINI IMPLEMENTATION -->
+<!-- SLIDE 19: THE CORRECT PARALLELISM -->
 <!-- ══════════════════════════════════════════════════════ -->
 <div class="slide" data-slide="19">
+  <h2>El paralelo <span class="bright">correcto</span> con observabilidad</h2>
+  <p class="dim" style="margin-bottom:20px;">Memory no es observabilidad. Hay que mapear bien las piezas.</p>
+  <div class="grid-2" style="margin-top:12px;">
+    <div>
+      <h3 class="dim" style="font-size:0.9rem; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:16px;">Infraestructura clásica</h3>
+      <div class="card" style="margin-bottom:10px; padding:16px 20px;">
+        <p style="font-size:1.05rem;"><span class="accent-c" style="font-weight:700;">Traces / Logs</span></p>
+        <p class="dim" style="font-size:0.9rem;">Telemetría cruda de lo que pasó</p>
+      </div>
+      <div class="card" style="margin-bottom:10px; padding:16px 20px;">
+        <p style="font-size:1.05rem;"><span class="accent-c" style="font-weight:700;">Git log</span></p>
+        <p class="dim" style="font-size:0.9rem;">Audit trail inmutable de cada cambio</p>
+      </div>
+      <div class="card" style="margin-bottom:10px; padding:16px 20px;">
+        <p style="font-size:1.05rem;"><span class="accent-c" style="font-weight:700;">Runbook / Wiki</span></p>
+        <p class="dim" style="font-size:0.9rem;">Conocimiento curado por humanos</p>
+      </div>
+      <div class="card" style="padding:16px 20px;">
+        <p style="font-size:1.05rem;"><span class="accent-c" style="font-weight:700;">Retro semanal</span></p>
+        <p class="dim" style="font-size:0.9rem;">Humano revisa logs → mejora runbook</p>
+      </div>
+    </div>
+    <div>
+      <h3 class="dim" style="font-size:0.9rem; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:16px;">Managed Agents API</h3>
+      <div class="card" style="margin-bottom:10px; padding:16px 20px; border-left:3px solid var(--accent2);">
+        <p style="font-size:1.05rem;"><span class="yellow-c" style="font-weight:700;">Event Stream</span></p>
+        <p class="dim" style="font-size:0.9rem;">Cada tool_use, tool_result &mdash; telemetría real</p>
+      </div>
+      <div class="card" style="margin-bottom:10px; padding:16px 20px; border-left:3px solid var(--memory-color);">
+        <p style="font-size:1.05rem;"><span class="memory-c" style="font-weight:700;">Memory Versions</span></p>
+        <p class="dim" style="font-size:0.9rem;">Inmutables, SHA256, retención 30 días, redact PII</p>
+      </div>
+      <div class="card" style="margin-bottom:10px; padding:16px 20px; border-left:3px solid var(--memory-color);">
+        <p style="font-size:1.05rem;"><span class="memory-c" style="font-weight:700;">Memory Store</span></p>
+        <p class="dim" style="font-size:0.9rem;">Artefacto de conocimiento curado por el agente</p>
+      </div>
+      <div class="card" style="padding:16px 20px; border-left:3px solid var(--dream-color);">
+        <p style="font-size:1.05rem;"><span class="dream-c" style="font-weight:700;">Dreams</span></p>
+        <p class="dim" style="font-size:0.9rem;">Job autónomo que mina telemetría → mejor conocimiento</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- SLIDE 20: DREAMS = HUMAN LOOP MADE AUTONOMOUS -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="slide" data-slide="20">
+  <h2>Dreams = el loop humano de mejora, <span class="dream-c">ahora autónomo</span></h2>
+  <div class="grid-2" style="margin-top:24px;">
+    <div>
+      <h3 class="dim" style="font-size:0.9rem; text-transform:uppercase;">Antes &mdash; Loop humano</h3>
+      <div class="diagram" style="flex-direction:column; gap:10px; margin-top:12px;">
+        <div class="box" style="width:100%; text-align:left; border-color:var(--accent);">
+          <div style="font-size:1rem;"><span class="accent-c" style="font-weight:700;">1.</span> Ingeniero lee los traces / postmortems</div>
+        </div>
+        <div class="arrow" style="font-size:1rem;">&#8595; atención humana</div>
+        <div class="box" style="width:100%; text-align:left; border-color:var(--accent);">
+          <div style="font-size:1rem;"><span class="accent-c" style="font-weight:700;">2.</span> Detecta patrones vs casos aislados</div>
+        </div>
+        <div class="arrow" style="font-size:1rem;">&#8595; juicio de síntesis</div>
+        <div class="box" style="width:100%; text-align:left; border-color:var(--accent);">
+          <div style="font-size:1rem;"><span class="accent-c" style="font-weight:700;">3.</span> Refactoriza runbook / prompts / config</div>
+        </div>
+        <div class="arrow" style="font-size:1rem;">&#8595; deploy manual</div>
+        <div class="box" style="width:100%; text-align:left; border-color:rgba(255,255,255,0.15);">
+          <div style="font-size:0.95rem;" class="dim">Ese paso de síntesis era una <strong>caja negra</strong> &mdash; en la cabeza del ingeniero</div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <h3 class="dim" style="font-size:0.9rem; text-transform:uppercase;">Ahora &mdash; Dream Engine</h3>
+      <div class="diagram" style="flex-direction:column; gap:10px; margin-top:12px;">
+        <div class="box box-memory" style="width:100%; text-align:left;">
+          <div style="font-size:1rem;"><span class="memory-c" style="font-weight:700;">1.</span> Lee memory store + 1-100 session transcripts</div>
+        </div>
+        <div class="arrow" style="font-size:1rem;">&#8595; atención automática</div>
+        <div class="box box-dream" style="width:100%; text-align:left;">
+          <div style="font-size:1rem;"><span class="dream-c" style="font-weight:700;">2.</span> LLM deduplica, fusiona, extrae insights</div>
+          <div class="dim" style="font-size:0.85rem; margin-top:2px;">Dirigible con <span class="mono">instructions</span></div>
+        </div>
+        <div class="arrow" style="font-size:1rem;">&#8595; output store separado</div>
+        <div class="box box-dream" style="width:100%; text-align:left;">
+          <div style="font-size:1rem;"><span class="dream-c" style="font-weight:700;">3.</span> Produce nuevo store reorganizado</div>
+          <div class="dim" style="font-size:0.85rem; margin-top:2px;">Input <strong>nunca se modifica</strong> &mdash; es un PR, no un auto-merge</div>
+        </div>
+        <div class="arrow" style="font-size:1rem;">&#8595; gate humano para adoptar</div>
+        <div class="box box-dream" style="width:100%; text-align:left;">
+          <div style="font-size:0.95rem;">Y el propio dream genera su <strong class="dream-c">trace auditable</strong> via <span class="mono">session_id</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- SLIDE 21: RECURSIVE OBSERVABILITY -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="slide" data-slide="21">
+  <h2>El cierre del círculo: <span class="dream-c">observabilidad recursiva</span></h2>
+  <p class="dim" style="margin-bottom:24px;">La diferencia conceptual fina respecto al humano.</p>
+  <div class="grid-2" style="margin-top:12px;">
+    <div>
+      <div class="card" style="margin-bottom:16px; border-top:3px solid var(--dream-color);">
+        <h3 class="dream-c">Dreams es batch, no real-time</h3>
+        <p style="font-size:1.05rem; margin-top:8px;">
+          El loop humano tenía dos modos: <strong>real-time</strong> (alerting, auto-rollback) y <strong>batch</strong> (la retro semanal, el refactor del wiki).
+        </p>
+        <p style="font-size:1.05rem; margin-top:12px;">
+          Dreams es explícitamente <strong>batch/offline</strong>: corre asíncrono, tarda minutos a decenas de minutos. Es consolidación tipo <strong>replay hipocampal durante el sueño</strong>.
+        </p>
+      </div>
+      <div class="card" style="border-top:3px solid var(--accent2);">
+        <h3 class="yellow-c">Dos trabajos tácitos externalizados</h3>
+        <ul style="margin-top:12px;">
+          <li style="padding:6px 0; font-size:1.05rem;"><strong>Atención</strong> &mdash; alguien tenía que leer los logs. Ahora se procesan 1 a 100 sesiones por corrida.</li>
+          <li style="padding:6px 0; font-size:1.05rem;"><strong>Juicio de síntesis</strong> &mdash; ¿patrón real o caso aislado? Dirigible con el campo <span class="mono dream-c">instructions</span>.</li>
+        </ul>
+      </div>
+    </div>
+    <div style="display:flex; flex-direction:column; justify-content:center;">
+      <div class="card card-dream" style="padding:28px; text-align:center;">
+        <h3 class="dream-c" style="font-size:1.3rem;">Observabilidad sobre la observabilidad</h3>
+        <div class="diagram" style="flex-direction:column; gap:12px; margin-top:20px;">
+          <div class="box" style="width:100%; border-color:var(--memory-color);">
+            <div style="font-size:0.95rem;">Agente opera → genera <span class="memory-c">event stream</span></div>
+          </div>
+          <div class="arrow" style="font-size:1rem;">&#8595;</div>
+          <div class="box box-dream" style="width:100%;">
+            <div style="font-size:0.95rem;">Dream consolida → genera <span class="dream-c">su propio trace</span></div>
+          </div>
+          <div class="arrow" style="font-size:1rem;">&#8595;</div>
+          <div class="box" style="width:100%; border-color:var(--accent2);">
+            <div style="font-size:0.95rem;">El trace del dream es <span class="yellow-c">auditable</span></div>
+          </div>
+        </div>
+        <p style="font-size:1.05rem; margin-top:20px;">
+          Cuando el ingeniero hacía la síntesis en su cabeza, ese paso era una <strong>caja negra</strong>.
+        </p>
+        <p style="font-size:1.15rem; margin-top:8px; font-weight:700;" class="dream-c">
+          Acá el paso de síntesis genera su propio trace.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- SLIDE 22: OUR GEMINI IMPLEMENTATION -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="slide" data-slide="22">
   <h2>Nuestra implementación con <span class="yellow-c">Gemini 2.5 Flash</span></h2>
   <p class="dim" style="margin-bottom:20px;">Sin APIs propietarias &mdash; REST API directa</p>
   <div class="grid-2">
@@ -1274,9 +1425,9 @@ POST <span class="string">generativelanguage.googleapis.com
 </div>
 
 <!-- ══════════════════════════════════════════════════════ -->
-<!-- SLIDE 20: UNIFIED INTERFACE -->
+<!-- SLIDE 23: UNIFIED INTERFACE -->
 <!-- ══════════════════════════════════════════════════════ -->
-<div class="slide" data-slide="20">
+<div class="slide" data-slide="23">
   <h2>Una sola interfaz: <span class="mono bright">Tool Calls</span></h2>
   <div class="code-block" style="font-size:1.05rem; margin-top:28px; max-width:800px;"><span class="comment">// Las 12 herramientas — mismo array, misma interfaz</span>
 
@@ -1301,9 +1452,9 @@ POST <span class="string">generativelanguage.googleapis.com
 </div>
 
 <!-- ══════════════════════════════════════════════════════ -->
-<!-- SLIDE 21: DEMO SETUP -->
+<!-- SLIDE 24: DEMO SETUP -->
 <!-- ══════════════════════════════════════════════════════ -->
-<div class="slide" data-slide="21">
+<div class="slide" data-slide="24">
   <div class="section-num">DEMO</div>
   <h2>Demo en vivo &mdash; <span class="bright">RoClaw Patrol Robot</span></h2>
   <div class="grid-2" style="margin-top:24px;">
@@ -1338,9 +1489,9 @@ POST <span class="string">generativelanguage.googleapis.com
 </div>
 
 <!-- ══════════════════════════════════════════════════════ -->
-<!-- SLIDE 22: DEMO RUN 1 -->
+<!-- SLIDE 25: DEMO RUN 1 -->
 <!-- ══════════════════════════════════════════════════════ -->
-<div class="slide" data-slide="22">
+<div class="slide" data-slide="25">
   <span class="tag" style="background:rgba(255,107,107,0.1); color:var(--accent); border:1px solid rgba(255,107,107,0.3); margin-bottom:16px;">Run 1 &mdash; Cold Start</span>
   <h2>Primera patrulla, memoria vacía</h2>
   <ul class="timeline" style="margin-top:20px;">
@@ -1366,9 +1517,9 @@ POST <span class="string">generativelanguage.googleapis.com
 </div>
 
 <!-- ══════════════════════════════════════════════════════ -->
-<!-- SLIDE 23: DEMO DREAM -->
+<!-- SLIDE 26: DEMO DREAM -->
 <!-- ══════════════════════════════════════════════════════ -->
-<div class="slide" data-slide="23">
+<div class="slide" data-slide="26">
   <span class="tag tag-dream" style="margin-bottom:16px;">Dream &mdash; Consolidación</span>
   <h2>El robot <span class="dream-c">"duerme"</span> y reorganiza su experiencia</h2>
   <div class="grid-2" style="margin-top:24px;">
@@ -1408,9 +1559,9 @@ POST <span class="string">generativelanguage.googleapis.com
 </div>
 
 <!-- ══════════════════════════════════════════════════════ -->
-<!-- SLIDE 24: DEMO RUN 2 -->
+<!-- SLIDE 27: DEMO RUN 2 -->
 <!-- ══════════════════════════════════════════════════════ -->
-<div class="slide" data-slide="24">
+<div class="slide" data-slide="27">
   <span class="tag" style="background:rgba(81,207,102,0.1); color:var(--green); border:1px solid rgba(81,207,102,0.3); margin-bottom:16px;">Run 2 &mdash; Warm Start</span>
   <h2>El robot recuerda y se <span class="green-c">adapta</span></h2>
   <table class="compare-table" style="margin-top:24px;">
@@ -1456,9 +1607,9 @@ POST <span class="string">generativelanguage.googleapis.com
 </div>
 
 <!-- ══════════════════════════════════════════════════════ -->
-<!-- SLIDE 25: ARCHITECTURE -->
+<!-- SLIDE 28: ARCHITECTURE -->
 <!-- ══════════════════════════════════════════════════════ -->
-<div class="slide" data-slide="25">
+<div class="slide" data-slide="28">
   <h2>Arquitectura &mdash; <span class="dim">8 archivos TypeScript</span></h2>
   <div class="grid-2" style="margin-top:20px;">
     <div class="file-tree" style="font-size:0.9rem;"><span class="folder">src/</span>
@@ -1497,9 +1648,9 @@ POST <span class="string">generativelanguage.googleapis.com
 </div>
 
 <!-- ══════════════════════════════════════════════════════ -->
-<!-- SLIDE 26: BIOLOGY -->
+<!-- SLIDE 29: BIOLOGY -->
 <!-- ══════════════════════════════════════════════════════ -->
-<div class="slide" data-slide="26">
+<div class="slide" data-slide="29">
   <h2>¿Por qué <span class="dream-c">"Dreams"</span>? &mdash; La analogía biológica</h2>
   <div class="grid-2" style="margin-top:28px;">
     <div class="card">
@@ -1527,9 +1678,9 @@ POST <span class="string">generativelanguage.googleapis.com
 </div>
 
 <!-- ══════════════════════════════════════════════════════ -->
-<!-- SLIDE 27: APPLICATIONS -->
+<!-- SLIDE 30: APPLICATIONS -->
 <!-- ══════════════════════════════════════════════════════ -->
-<div class="slide" data-slide="27">
+<div class="slide" data-slide="30">
   <h2>Dónde más aplican estas primitivas</h2>
   <div class="grid-4" style="margin-top:28px;">
     <div class="card">
@@ -1568,9 +1719,9 @@ POST <span class="string">generativelanguage.googleapis.com
 </div>
 
 <!-- ══════════════════════════════════════════════════════ -->
-<!-- SLIDE 28: THE FUTURE -->
+<!-- SLIDE 31: THE FUTURE -->
 <!-- ══════════════════════════════════════════════════════ -->
-<div class="slide" data-slide="28">
+<div class="slide" data-slide="31">
   <h2>Lo que viene &mdash; Agentes que <span class="skill-c">evolucionan</span></h2>
   <div style="margin-top:32px;">
     <div style="display:flex; align-items:flex-start; gap:24px; padding:20px 0; border-bottom:1px solid rgba(255,255,255,0.06);">
@@ -1609,9 +1760,9 @@ POST <span class="string">generativelanguage.googleapis.com
 </div>
 
 <!-- ══════════════════════════════════════════════════════ -->
-<!-- SLIDE 29: SPECIALIZATION AT SCALE + SHARED MEMORY -->
+<!-- SLIDE 32: SPECIALIZATION AT SCALE + SHARED MEMORY -->
 <!-- ══════════════════════════════════════════════════════ -->
-<div class="slide" data-slide="29">
+<div class="slide" data-slide="32">
   <h2>Especialización a escala: <span class="memory-c">memoria compartida</span></h2>
   <p class="dim" style="margin-bottom:20px;">¿Qué pasa cuando no es un agente sino miles?</p>
   <div class="grid-2" style="margin-top:12px;">
@@ -1667,9 +1818,9 @@ POST <span class="string">generativelanguage.googleapis.com
 </div>
 
 <!-- ══════════════════════════════════════════════════════ -->
-<!-- SLIDE 30: INFRASTRUCTURE - THE NEXT GITHUB / K8S -->
+<!-- SLIDE 33: INFRASTRUCTURE - THE NEXT GITHUB / K8S -->
 <!-- ══════════════════════════════════════════════════════ -->
-<div class="slide" data-slide="30">
+<div class="slide" data-slide="33">
   <h2>Infraestructura: <span class="yellow-c">¿cuál es el próximo GitHub para agentes?</span></h2>
   <p class="dim" style="margin-bottom:24px;">Los agentes necesitan su propia infraestructura. ¿Qué existe hoy y qué falta?</p>
   <div class="grid-2" style="margin-top:8px;">
@@ -1714,9 +1865,9 @@ POST <span class="string">generativelanguage.googleapis.com
 </div>
 
 <!-- ══════════════════════════════════════════════════════ -->
-<!-- SLIDE 31: AGENTS CONTROLLING AGENTS -->
+<!-- SLIDE 34: AGENTS CONTROLLING AGENTS -->
 <!-- ══════════════════════════════════════════════════════ -->
-<div class="slide" data-slide="31">
+<div class="slide" data-slide="34">
   <h2>Agentes que <span class="accent-c">controlan</span> y <span class="green-c">mejoran</span> otros agentes</h2>
   <p class="dim" style="margin-bottom:24px;">Meta-agentes: supervisión, evaluación y evolución autónoma.</p>
   <div class="grid-2" style="margin-top:12px;">
@@ -1780,9 +1931,9 @@ POST <span class="string">generativelanguage.googleapis.com
 </div>
 
 <!-- ══════════════════════════════════════════════════════ -->
-<!-- SLIDE 32: SECURITY + SCALABILITY - OPEN QUESTIONS -->
+<!-- SLIDE 35: SECURITY + SCALABILITY - OPEN QUESTIONS -->
 <!-- ══════════════════════════════════════════════════════ -->
-<div class="slide" data-slide="32">
+<div class="slide" data-slide="35">
   <h2>Las dos grandes preguntas abiertas</h2>
   <p class="dim" style="margin-bottom:24px;">Temas para la conversación &mdash; no tenemos todas las respuestas.</p>
   <div class="grid-2" style="margin-top:12px;">
@@ -1827,9 +1978,9 @@ POST <span class="string">generativelanguage.googleapis.com
 </div>
 
 <!-- ══════════════════════════════════════════════════════ -->
-<!-- SLIDE 33: HISTORA -->
+<!-- SLIDE 36: HISTORA -->
 <!-- ══════════════════════════════════════════════════════ -->
-<div class="slide slide-section" data-slide="33">
+<div class="slide slide-section" data-slide="36">
   <div>
     <p class="dim" style="font-size:1rem; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:24px;">Histora</p>
     <h1 style="font-size:2.4rem; background:none; -webkit-text-fill-color:var(--text-bright);">Muchas de las tecnologías presentadas<br>en esta charla son parte del próximo<br><span style="background: linear-gradient(135deg, var(--skill-color), var(--memory-color), var(--dream-color)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">stack tecnológico de Histora</span>.</h1>
@@ -1837,9 +1988,9 @@ POST <span class="string">generativelanguage.googleapis.com
 </div>
 
 <!-- ══════════════════════════════════════════════════════ -->
-<!-- SLIDE 34: CLOSING -->
+<!-- SLIDE 37: CLOSING -->
 <!-- ══════════════════════════════════════════════════════ -->
-<div class="slide slide-title" data-slide="34">
+<div class="slide slide-title" data-slide="37">
   <div>
     <h1 style="font-size:3rem;">¿Preguntas?</h1>
     <p class="subtitle" style="max-width:700px; margin:24px auto 0;">
@@ -1867,9 +2018,9 @@ POST <span class="string">generativelanguage.googleapis.com
 
 <!-- ── Navigation bar ──────────────────────────────────── -->
 <div class="nav-bar">
-  <span class="slide-num" id="slideNum">1 / 34</span>
+  <span class="slide-num" id="slideNum">1 / 37</span>
   <div class="progress">
-    <div class="progress-fill" id="progressFill" style="width:2.9%"></div>
+    <div class="progress-fill" id="progressFill" style="width:2.7%"></div>
   </div>
   <span class="slide-num dim" style="font-size:0.8rem;">&#8592; &#8594; o click para navegar</span>
 </div>
